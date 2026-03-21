@@ -32,7 +32,7 @@ class ContactSection extends StatelessWidget {
     final subject = 'Inquiry from Accel-O-Rot Website';
 
     final gmailUri = Uri.parse(
-      'https://mail.google.com/mail/?view=cm&fs=1&to=$email&su=$subject',
+      'https://mail.google.com/mail/?view=cm&fs=1&to=      $email&su=$subject',
     );
 
     if (!await launchUrl(gmailUri)) {
@@ -154,6 +154,10 @@ class ContactSection extends StatelessWidget {
                                       'Terms of Service',
                                     ],
                                     onLinkTap: (link) => _handleLinkNavigation(context, link),
+                                    icons: const [
+                                      Icons.shield_outlined,
+                                      Icons.article_outlined,
+                                    ],
                                   ),
                                   const SizedBox(height: AppSpacing.xxxl),
                                   _FooterColumn(
@@ -166,7 +170,7 @@ class ContactSection extends StatelessWidget {
                                         _ContactRow(
                                           icon: Icons.facebook_outlined,
                                           text: 'Accel-O-Rot',
-                                          onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
+                                          onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/      '),
                                         ),
                                         const SizedBox(height: AppSpacing.md),
                                         _ContactRow(
@@ -205,6 +209,10 @@ class ContactSection extends StatelessWidget {
                                           'Terms of Service',
                                         ],
                                         onLinkTap: (link) => _handleLinkNavigation(context, link),
+                                        icons: const [
+                                          Icons.shield_outlined,
+                                          Icons.article_outlined,
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -220,7 +228,7 @@ class ContactSection extends StatelessWidget {
                                           _ContactRow(
                                             icon: Icons.facebook_outlined,
                                             text: 'Accel-O-Rot',
-                                            onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/'),
+                                            onTap: () => _launchUrl('https://www.facebook.com/share/1BmNSogMqh/      '),
                                           ),
                                           const SizedBox(height: AppSpacing.md),
                                           _ContactRow(
@@ -246,8 +254,13 @@ class ContactSection extends StatelessWidget {
                               ),
 
                             const SizedBox(height: AppSpacing.xxxl),
+                            
+                            // Horizontal line
                             Container(height: 1, color: const Color(0xFF374151)),
+                            
                             const SizedBox(height: AppSpacing.md),
+                            
+                            // Copyright text - centered and AFTER the line
                             Center(
                               child: Text(
                                 '© 2026 Accel-O-Rot. All rights reserved.',
@@ -262,15 +275,15 @@ class ContactSection extends StatelessWidget {
                       ),
                     ],
                   ),
-                  // Back to Top Button - positioned on right side (desktop only)
+                  // Return to Top Button - positioned on right side (desktop only)
                   if (!isMobile && showBackToTop)
                     Positioned(
-                      right: AppSpacing.xl,
-                      bottom: AppSpacing.xl * 2,
+                      right: AppSpacing.xl * 2,
+                      bottom: AppSpacing.xl * 5,
                       child: AnimatedOpacity(
                         opacity: showBackToTop ? 1.0 : 0.0,
                         duration: const Duration(milliseconds: 300),
-                        child: _BackToTopButton(onTap: onBackToTop),
+                        child: _ReturnToTopButton(onTap: onBackToTop),
                       ),
                     ),
                 ],
@@ -290,16 +303,20 @@ class _FooterColumn extends StatelessWidget {
   final List<String> links;
   final ValueChanged<String>? onLinkTap;
   final Widget? customContent;
+  final List<IconData>? icons;
 
   const _FooterColumn({
     required this.title,
     required this.links,
     this.onLinkTap,
     this.customContent,
+    this.icons,
   });
 
   @override
   Widget build(BuildContext context) {
+    final linkIcons = icons;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -324,6 +341,9 @@ class _FooterColumn extends StatelessWidget {
                     _FooterLink(
                       text: links[i],
                       onTap: () => onLinkTap?.call(links[i]),
+                      icon: linkIcons != null && i < linkIcons.length 
+                          ? linkIcons[i] 
+                          : null,
                     ),
                     if (i < links.length - 1) const SizedBox(height: AppSpacing.md),
                   ],
@@ -338,25 +358,44 @@ class _FooterColumn extends StatelessWidget {
 class _FooterLink extends StatelessWidget {
   final String text;
   final VoidCallback? onTap;
+  final IconData? icon;
 
   const _FooterLink({
     required this.text,
     this.onTap,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
+    final content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (icon != null) ...[
+          Icon(
+            icon,
+            color: Colors.white,
+            size: 18,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+        ],
+        Flexible(
+          child: Text(
+            text,
+            style: WebTextStyles.caption.copyWith(
+              color: const Color(0xFF9CA3AF),
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ],
+    );
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTap: onTap,
-        child: Text(
-          text,
-          style: WebTextStyles.caption.copyWith(
-            color: const Color(0xFF9CA3AF),
-            fontSize: 14,
-          ),
-        ),
+        child: content,
       ),
     );
   }
@@ -405,16 +444,16 @@ class _ContactRow extends StatelessWidget {
   }
 }
 
-class _BackToTopButton extends StatefulWidget {
+class _ReturnToTopButton extends StatefulWidget {
   final VoidCallback? onTap;
 
-  const _BackToTopButton({this.onTap});
+  const _ReturnToTopButton({this.onTap});
 
   @override
-  State<_BackToTopButton> createState() => _BackToTopButtonState();
+  State<_ReturnToTopButton> createState() => _ReturnToTopButtonState();
 }
 
-class _BackToTopButtonState extends State<_BackToTopButton> {
+class _ReturnToTopButtonState extends State<_ReturnToTopButton> {
   bool _isHovered = false;
 
   @override
@@ -427,11 +466,13 @@ class _BackToTopButtonState extends State<_BackToTopButton> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding: _isHovered
+              ? const EdgeInsets.symmetric(horizontal: 24, vertical: 12)
+              : const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: _isHovered 
-                ? const Color(0xFFB91C1C)
-                : const Color(0xFFDC2626),
+                ? const Color(0xFF16A34A)
+                : const Color(0xFF22C55E),
             borderRadius: BorderRadius.circular(50),
             boxShadow: [
               BoxShadow(
@@ -441,24 +482,38 @@ class _BackToTopButtonState extends State<_BackToTopButton> {
               ),
             ],
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.arrow_upward_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Back to top',
-                style: WebTextStyles.caption.copyWith(
+          child: AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeInOut,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.arrow_upward_rounded,
                   color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  size: 20,
                 ),
-              ),
-            ],
+                AnimatedOpacity(
+                  opacity: _isHovered ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 150),
+                  child: _isHovered
+                      ? Row(
+                          children: [
+                            const SizedBox(width: 8),
+                            Text(
+                              'Return to Top',
+                              style: WebTextStyles.caption.copyWith(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
           ),
         ),
       ),
