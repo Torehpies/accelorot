@@ -76,8 +76,10 @@ Future<void> handleLogout(
   );
 
   if (shouldLogout == true && context.mounted) {
-    // Read providers from the nearest ProviderScope without requiring a WidgetRef.
     await FirebaseAuth.instance.signOut();
+    if (context.mounted) {
+      context.go(RoutePath.signin.path);
+    }
   }
 }
 
