@@ -37,11 +37,16 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
   bool _isLoading = false;
   String? _machineNameError;
 
+  static const List<DropdownItem<MachineStatus>> _statusItems = [
+    DropdownItem(value: MachineStatus.active, label: 'Active'),
+    DropdownItem(value: MachineStatus.inactive, label: 'Inactive'),
+    DropdownItem(value: MachineStatus.underMaintenance, label: 'Suspended'),
+  ];
+
   @override
   void initState() {
     super.initState();
-    _machineNameController =
-        TextEditingController(text: widget.machine.machineName);
+    _machineNameController = TextEditingController(text: widget.machine.machineName);
     _status = widget.machine.status;
   }
 
@@ -51,15 +56,13 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
     super.dispose();
   }
 
-  bool get _hasChanges {
-    return _machineNameController.text.trim() !=
-            widget.machine.machineName.trim() ||
-        _status != widget.machine.status;
-  }
+  // ── Derived helpers
+  bool get _hasChanges =>
+      _machineNameController.text.trim() != widget.machine.machineName.trim() ||
+      _status != widget.machine.status;
 
   bool _validate() {
     setState(() => _machineNameError = null);
-
     if (_machineNameController.text.trim().isEmpty) {
       setState(() => _machineNameError = 'Machine name cannot be empty');
       return false;
@@ -67,8 +70,33 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
     return true;
   }
 
-  Future<void> _save() async {
+  // ── Cancel handler
+  Future<void> _handleCancel() async {
+    if (_hasChanges) {
+      final result = await WebConfirmationDialog.show(context);
+      if (result == ConfirmResult.confirmed && context.mounted) {
+        Navigator.of(context).pop();
+      }
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
+  // ── Save handler
+  Future<void> _handleSave() async {
     if (!_validate()) return;
+
+    final result = await WebConfirmationDialog.show(
+      context,
+      title: 'Save Changes',
+      message: 'Are you sure you want to save changes to ${widget.machine.machineName}?',
+      confirmLabel: 'Save Changes',
+      cancelLabel: 'Go Back',
+      confirmIsDestructive: false,
+    );
+
+    if (result != ConfirmResult.confirmed) return;
+    if (!context.mounted) return;
 
     setState(() => _isLoading = true);
 
@@ -79,46 +107,27 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
         status: _status,
       );
 
-      if (mounted) {
-        Navigator.of(context).pop();
-        AppSnackbar.success(context, 'Machine updated successfully');
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        AppSnackbar.error(context, 'Failed to update machine');
-      }
-    }
-  }
-
-  Future<void> _cancel() async {
-    if (_hasChanges) {
-      final result = await WebConfirmationDialog.show(context);
-      if (result == ConfirmResult.confirmed && mounted) {
-        Navigator.of(context).pop();
-      }
-    } else {
+      if (!mounted) return;
       Navigator.of(context).pop();
+      AppSnackbar.success(context, 'Machine updated successfully');
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackbar.error(context, 'Failed to update machine');
+      setState(() => _isLoading = false);
     }
   }
 
-  static const List<DropdownItem<MachineStatus>> _statusItems = [
-    DropdownItem(value: MachineStatus.active, label: 'Active'),
-    DropdownItem(value: MachineStatus.inactive, label: 'Inactive'),
-    DropdownItem(value: MachineStatus.underMaintenance, label: 'Suspended'),
-  ];
-
-  MachineModel get machine => widget.machine;
-
+  // ── Build
   @override
   Widget build(BuildContext context) {
     return BaseDialog(
-      title: machine.machineName,
+      title: widget.machine.machineName,
       subtitle: 'Edit Machine',
       canClose: !_isLoading,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // ── Machine Name
           InputField(
             label: 'Machine Name',
             controller: _machineNameController,
@@ -126,9 +135,11 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
             errorText: _machineNameError,
             enabled: !_isLoading,
             required: true,
+            onChanged: (_) => setState(() => _machineNameError = null),
           ),
           const SizedBox(height: 16),
 
+          // ── Status
           WebDropdownField<MachineStatus>(
             label: 'Status',
             value: _status,
@@ -141,25 +152,26 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
           ),
           const SizedBox(height: 24),
 
+          // ── Read-only info
           ReadOnlySection(
             sectionTitle: 'Additional Information',
             fields: [
               ReadOnlyField(
                 label: 'Machine ID',
-                value: machine.machineId,
+                value: widget.machine.machineId,
               ),
               ReadOnlyField(
                 label: 'Current Batch',
-                value: machine.currentBatchId ?? 'No active batch',
+                value: widget.machine.currentBatchId ?? 'No active batch',
               ),
               ReadOnlyField(
                 label: 'Date Created',
-                value: DateFormat('MMM dd, yyyy').format(machine.dateCreated),
+                value: DateFormat('MMM dd, yyyy').format(widget.machine.dateCreated),
               ),
               ReadOnlyField(
                 label: 'Last Modified',
-                value: machine.lastModified != null
-                    ? DateFormat('MMM dd, yyyy').format(machine.lastModified!)
+                value: widget.machine.lastModified != null
+                    ? DateFormat('MMM dd, yyyy').format(widget.machine.lastModified!)
                     : 'Never',
               ),
             ],
@@ -167,13 +179,16 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
         ],
       ),
       actions: [
+        // ── Cancel
         DialogAction.secondary(
           label: 'Cancel',
-          onPressed: _isLoading ? null : _cancel,
+          onPressed: _isLoading ? null : _handleCancel,
         ),
+
+        // ── Save
         DialogAction.primary(
-          label: 'Save',
-          onPressed: _save,
+          label: 'Save Changes',
+          onPressed: _handleSave,
           isLoading: _isLoading,
           isDisabled: !_hasChanges,
         ),
