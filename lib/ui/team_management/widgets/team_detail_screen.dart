@@ -319,6 +319,7 @@ class TeamDetailScreenState extends ConsumerState<TeamDetailScreen>
     if (!mounted) return;
 
     showDialog(
+      // ignore: use_build_context_synchronously
       context: context,
       barrierColor: WebColors.dialogBarrier,
       barrierDismissible: false,

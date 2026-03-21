@@ -8,7 +8,6 @@ import '../view_model/settings_state.dart';
 import '../widgets/settings_section.dart';     
 import '../widgets/settings_tile.dart';
 import '../../change_password_dialog/widgets/change_password_dialog.dart';
-import '../../core/ui/confirm_dialog.dart';
 import '../../profile_screen/view_model/profile_notifier.dart';
 import '../../core/themes/app_theme.dart';
 import '../../../routes/navigation_utils.dart';

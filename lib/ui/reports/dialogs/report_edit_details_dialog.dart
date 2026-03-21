@@ -95,7 +95,8 @@ class _ReportEditDetailsDialogState extends State<ReportEditDetailsDialog> {
         cancelLabel: 'Keep Editing',
         confirmIsDestructive: true,
       );
-      if (result == ConfirmResult.confirmed && context.mounted) {
+      if (result == ConfirmResult.confirmed && context.mounted) {        
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pop();
       }
     } else {

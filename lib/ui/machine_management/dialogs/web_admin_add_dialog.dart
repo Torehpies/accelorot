@@ -86,6 +86,7 @@ class _WebAdminAddDialogState extends State<WebAdminAddDialog> {
         confirmIsDestructive: true,
       );
       if (result == ConfirmResult.confirmed && context.mounted) {
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pop();
       }
     } else {

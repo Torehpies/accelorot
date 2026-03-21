@@ -75,6 +75,7 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
     if (_hasChanges) {
       final result = await WebConfirmationDialog.show(context);
       if (result == ConfirmResult.confirmed && context.mounted) {
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pop();
       }
     } else {

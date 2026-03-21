@@ -79,6 +79,7 @@ class _AddOperatorDialogState extends ConsumerState<AddOperatorDialog> {
         confirmIsDestructive: true,
       );
       if (result == ConfirmResult.confirmed && context.mounted) {
+        // ignore: use_build_context_synchronously
         Navigator.of(context).pop();
       }
     } else {
