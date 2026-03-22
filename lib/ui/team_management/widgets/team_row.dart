@@ -5,7 +5,7 @@ import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_action_buttons.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
-import 'package:flutter_application_1/ui/team_management/widgets/view_team_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/dialogs/view_team_dialog.dart';
 import 'package:go_router/go_router.dart';
 
 class TeamRow extends StatelessWidget {

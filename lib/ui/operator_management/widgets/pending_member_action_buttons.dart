@@ -1,7 +1,7 @@
 // lib/ui/web_operator/widgets/pending_member_action_buttons.dart
 
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/ui/confirm_dialog.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog/web_confirmation_dialog.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_action_buttons.dart';
 import 'package:flutter_application_1/ui/operator_management/view_model/pending_members_notifier.dart';
 
@@ -22,35 +22,43 @@ class PendingMemberActionButtons extends StatelessWidget {
         TableActionButton(
           icon: Icons.check,
           tooltip: 'Accept Member',
-          onPressed: () => _showAcceptDialog(context),
+          onPressed: () => _handleAccept(context),
         ),
         TableActionButton(
           icon: Icons.cancel_outlined,
           tooltip: 'Decline Member',
-          onPressed: () => _showDeclineDialog(context),
+          onPressed: () => _handleDecline(context),
         ),
       ],
     );
   }
 
-  Future<void> _showAcceptDialog(BuildContext context) async {
-    final confirmed = await showConfirmDialog(
-      context: context,
+  Future<void> _handleAccept(BuildContext context) async {
+    final result = await WebConfirmationDialog.show(
+      context,
       title: 'Accept Request',
-      message: 'Accept ${member.firstName} ${member.lastName}?',
+      message: 'Are you sure you want to accept ${member.firstName} ${member.lastName}?',
+      confirmLabel: 'Accept',
+      cancelLabel: 'Cancel',
+      confirmIsDestructive: false,
     );
-    if (confirmed == true) {
+
+    if (result == ConfirmResult.confirmed) {
       await notifier.acceptRequest(member);
     }
   }
 
-  Future<void> _showDeclineDialog(BuildContext context) async {
-    final confirmed = await showConfirmDialog(
-      context: context,
+  Future<void> _handleDecline(BuildContext context) async {
+    final result = await WebConfirmationDialog.show(
+      context,
       title: 'Decline Request',
-      message: 'Decline ${member.firstName} ${member.lastName}?',
+      message: 'Are you sure you want to decline ${member.firstName} ${member.lastName}? This action cannot be undone.',
+      confirmLabel: 'Decline',
+      cancelLabel: 'Cancel',
+      confirmIsDestructive: true,
     );
-    if (confirmed == true) {
+
+    if (result == ConfirmResult.confirmed) {
       await notifier.declineRequest(member);
     }
   }

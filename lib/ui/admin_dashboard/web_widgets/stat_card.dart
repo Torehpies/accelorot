@@ -1,4 +1,5 @@
 // lib/ui/web_admin_home/widgets/stat_card.dart
+
 import 'package:flutter/material.dart';
 
 class StatCard extends StatelessWidget {
@@ -20,9 +21,8 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isNegative = growth < 0;
-    final growthColor = isNegative
-        ? const Color(0xFFEF4444)
-        : const Color(0xFF10B981);
+    final growthColor =
+        isNegative ? const Color(0xFFEF4444) : const Color(0xFF10B981);
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -70,9 +70,7 @@ class StatCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(
-                          isNegative
-                              ? Icons.arrow_downward
-                              : Icons.arrow_upward,
+                          isNegative ? Icons.arrow_downward : Icons.arrow_upward,
                           size: 12,
                           color: growthColor,
                         ),

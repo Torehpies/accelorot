@@ -25,7 +25,7 @@ class DialogHeader extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: WebColors.cardBorder)),
+        border: Border(bottom: BorderSide(color: WebColors.tableBorder)),
       ),
       child: Row(
         children: [
@@ -81,7 +81,7 @@ class DialogFooter extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: WebColors.cardBorder)),
+        border: Border(top: BorderSide(color: WebColors.tableBorder)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,

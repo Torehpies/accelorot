@@ -1,3 +1,5 @@
+// lib/ui/operator_management/widgets/mobile_team_members_tab.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/widgets/sample_cards/data_card.dart';
@@ -37,7 +39,7 @@ class _MobileTeamMembersState extends ConsumerState<MobileTeamMembersTab>
   void _onScroll() {
     if (_scrollController.position.pixels >=
         _scrollController.position.maxScrollExtent - 300) {
-      ref.read(teamMembersProvider.notifier).loadNextPage();
+      ref.read(teamMembersProvider.notifier).loadMoreItems();
     }
   }
 
@@ -77,10 +79,12 @@ class _MembersList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(teamMembersProvider);
-    if (state.isLoading && state.items.isEmpty) {
-      return Center(child: CircularProgressIndicator());
+
+    if (state.isLoading && state.allMembers.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
     }
-    if (state.items.isEmpty && !state.isLoading) {
+
+    if (state.displayedMembers.isEmpty && !state.isLoading) {
       return Center(
         child: Text(
           'No team members found',
@@ -88,23 +92,24 @@ class _MembersList extends ConsumerWidget {
         ),
       );
     }
+
     return ListView.separated(
       controller: scrollController,
-      padding: EdgeInsets.all(16),
-      separatorBuilder: (_, _) => SizedBox(height: 2),
-      itemCount: state.items.length + (state.hasNextPage ? 1 : 0),
+      padding: const EdgeInsets.all(16),
+      separatorBuilder: (_, _) => const SizedBox(height: 2),
+      itemCount: state.displayedMembers.length + (state.hasMoreToLoad ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index >= state.items.length) {
+        if (index >= state.displayedMembers.length) {
           return _buildLoadingItem();
         }
-        final member = state.items[index];
+        final member = state.displayedMembers[index];
         final style = getStatusStyle(member.status.value);
         return DataCard<TeamMember>(
           data: member,
           icon: Icons.person,
           iconColor: style.textColor,
           iconBgColor: style.color,
-          title: "${member.lastName}, ${member.firstName}",
+          title: '${member.lastName}, ${member.firstName}',
           category: _getStatusLabel(member.status.value),
           status: member.email,
           onTap: () {
@@ -128,7 +133,7 @@ class _MembersList extends ConsumerWidget {
 }
 
 Widget _buildLoadingItem() {
-  return Padding(
+  return const Padding(
     padding: EdgeInsets.all(16),
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,

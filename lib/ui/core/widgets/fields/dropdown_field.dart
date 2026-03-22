@@ -161,14 +161,14 @@ class WebDropdownField<T> extends StatelessWidget {
             Icons.keyboard_arrow_down,
             color: enabled ? WebColors.textLabel : WebColors.iconDisabled,
           ),
-          // Rounded borders (matching mobile design)
+          // Rounded borders
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: WebColors.cardBorder),
+            borderSide: BorderSide(color: WebColors.tableBorder),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: WebColors.cardBorder),
+            borderSide: BorderSide(color: WebColors.tableBorder),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

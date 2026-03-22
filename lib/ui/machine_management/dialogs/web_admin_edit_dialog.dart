@@ -1,19 +1,24 @@
 // lib/ui/machine_management/dialogs/web_admin_edit_dialog.dart
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../../data/models/machine_model.dart';
 import '../../core/widgets/dialog/base_dialog.dart';
 import '../../core/widgets/dialog/dialog_action.dart';
 import '../../core/widgets/dialog/dialog_fields.dart';
+import '../../core/widgets/dialog/web_confirmation_dialog.dart';
 import '../../core/ui/app_snackbar.dart';
+
+typedef UpdateMachineCallback = Future<void> Function({
+  required String machineId,
+  String? machineName,
+  MachineStatus? status,
+  List<String>? assignedUserIds,
+});
 
 class WebAdminEditDialog extends StatefulWidget {
   final MachineModel machine;
-  final Future<void> Function({
-    required String machineId,
-    required String machineName,
-  })
-  onUpdate;
+  final UpdateMachineCallback onUpdate;
 
   const WebAdminEditDialog({
     super.key,
@@ -26,54 +31,81 @@ class WebAdminEditDialog extends StatefulWidget {
 }
 
 class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
-  late final TextEditingController _nameController;
-  bool _isSubmitting = false;
-  String? _nameError;
+  late final TextEditingController _machineNameController;
+  late MachineStatus _status;
+
+  bool _isLoading = false;
+  String? _machineNameError;
+
+  static const List<DropdownItem<MachineStatus>> _statusItems = [
+    DropdownItem(value: MachineStatus.active, label: 'Active'),
+    DropdownItem(value: MachineStatus.inactive, label: 'Inactive'),
+    DropdownItem(value: MachineStatus.underMaintenance, label: 'Suspended'),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.machine.machineName);
-    _nameController.addListener(_validateName);
+    _machineNameController = TextEditingController(text: widget.machine.machineName);
+    _status = widget.machine.status;
   }
 
   @override
   void dispose() {
-    _nameController.removeListener(_validateName);
-    _nameController.dispose();
+    _machineNameController.dispose();
     super.dispose();
   }
 
-  bool get _hasChanges {
-    return _nameController.text.trim() != widget.machine.machineName;
-  }
+  // ── Derived helpers
+  bool get _hasChanges =>
+      _machineNameController.text.trim() != widget.machine.machineName.trim() ||
+      _status != widget.machine.status;
 
-  void _validateName() {
-    setState(() {
-      final name = _nameController.text.trim();
-      if (name.isEmpty) {
-        _nameError = 'Machine name is required';
-      } else {
-        _nameError = null;
-      }
-    });
-  }
-
-  Future<void> _handleSubmit() async {
-    final name = _nameController.text.trim();
-
-    // Validate
-    if (name.isEmpty) {
-      setState(() => _nameError = 'Machine name is required');
-      return;
+  bool _validate() {
+    setState(() => _machineNameError = null);
+    if (_machineNameController.text.trim().isEmpty) {
+      setState(() => _machineNameError = 'Machine name cannot be empty');
+      return false;
     }
+    return true;
+  }
 
-    setState(() => _isSubmitting = true);
+  // ── Cancel handler
+  Future<void> _handleCancel() async {
+    if (_hasChanges) {
+      final result = await WebConfirmationDialog.show(context);
+      if (result == ConfirmResult.confirmed && context.mounted) {
+        // ignore: use_build_context_synchronously
+        Navigator.of(context).pop();
+      }
+    } else {
+      Navigator.of(context).pop();
+    }
+  }
+
+  // ── Save handler
+  Future<void> _handleSave() async {
+    if (!_validate()) return;
+
+    final result = await WebConfirmationDialog.show(
+      context,
+      title: 'Save Changes',
+      message: 'Are you sure you want to save changes to ${widget.machine.machineName}?',
+      confirmLabel: 'Save Changes',
+      cancelLabel: 'Go Back',
+      confirmIsDestructive: false,
+    );
+
+    if (result != ConfirmResult.confirmed) return;
+    if (!context.mounted) return;
+
+    setState(() => _isLoading = true);
 
     try {
       await widget.onUpdate(
         machineId: widget.machine.machineId,
-        machineName: name,
+        machineName: _machineNameController.text.trim(),
+        status: _status,
       );
 
       if (!mounted) return;
@@ -81,56 +113,85 @@ class _WebAdminEditDialogState extends State<WebAdminEditDialog> {
       AppSnackbar.success(context, 'Machine updated successfully');
     } catch (e) {
       if (!mounted) return;
-      AppSnackbar.error(context, 'Failed to update: $e');
-      setState(() => _isSubmitting = false);
+      AppSnackbar.error(context, 'Failed to update machine');
+      setState(() => _isLoading = false);
     }
   }
 
+  // ── Build
   @override
   Widget build(BuildContext context) {
     return BaseDialog(
-      title: 'Edit Machine',
-      subtitle: 'Update machine details',
-      maxHeightFactor: 0.65,
-      canClose: !_isSubmitting,
+      title: widget.machine.machineName,
+      subtitle: 'Edit Machine',
+      canClose: !_isLoading,
       content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // ── Machine Name
           InputField(
             label: 'Machine Name',
-            controller: _nameController,
+            controller: _machineNameController,
             hintText: 'Enter machine name',
-            errorText: _nameError,
-            enabled: !_isSubmitting,
+            errorText: _machineNameError,
+            enabled: !_isLoading,
             required: true,
-            maxLength: 50,
+            onChanged: (_) => setState(() => _machineNameError = null),
           ),
           const SizedBox(height: 16),
-          InputField(
-            label: 'Machine ID',
-            controller: TextEditingController(text: widget.machine.machineId),
-            helperText: 'Machine ID cannot be changed',
-            enabled: false,
+
+          // ── Status
+          WebDropdownField<MachineStatus>(
+            label: 'Status',
+            value: _status,
+            items: _statusItems,
+            enabled: !_isLoading,
+            required: true,
+            onChanged: (v) {
+              if (v != null) setState(() => _status = v);
+            },
           ),
-          const SizedBox(height: 16),
-          InputField(
-            label: 'Assigned Users',
-            controller: TextEditingController(text: 'All Team Members'),
-            helperText: 'All team members have access to this machine',
-            enabled: false,
+          const SizedBox(height: 24),
+
+          // ── Read-only info
+          ReadOnlySection(
+            sectionTitle: 'Additional Information',
+            fields: [
+              ReadOnlyField(
+                label: 'Machine ID',
+                value: widget.machine.machineId,
+              ),
+              ReadOnlyField(
+                label: 'Current Batch',
+                value: widget.machine.currentBatchId ?? 'No active batch',
+              ),
+              ReadOnlyField(
+                label: 'Date Created',
+                value: DateFormat('MMM dd, yyyy').format(widget.machine.dateCreated),
+              ),
+              ReadOnlyField(
+                label: 'Last Modified',
+                value: widget.machine.lastModified != null
+                    ? DateFormat('MMM dd, yyyy').format(widget.machine.lastModified!)
+                    : 'Never',
+              ),
+            ],
           ),
         ],
       ),
       actions: [
+        // ── Cancel
         DialogAction.secondary(
           label: 'Cancel',
-          onPressed: _isSubmitting ? null : () => Navigator.of(context).pop(),
+          onPressed: _isLoading ? null : _handleCancel,
         ),
+
+        // ── Save
         DialogAction.primary(
-          label: 'Update Machine',
-          onPressed: _handleSubmit,
-          isLoading: _isSubmitting,
-          isDisabled: !_hasChanges || _nameError != null,
+          label: 'Save Changes',
+          onPressed: _handleSave,
+          isLoading: _isLoading,
+          isDisabled: !_hasChanges,
         ),
       ],
     );

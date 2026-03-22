@@ -22,7 +22,6 @@ import '../../core/widgets/sample_cards/data_card.dart';
 import '../../core/widgets/sample_cards/data_card_skeleton.dart';
 import '../../../utils/get_operator_status_style.dart';
 
-// Tab index constants — keeps magic numbers out of build methods
 const _kMembersTab = 0;
 const _kPendingTab = 1;
 
@@ -45,19 +44,14 @@ class _MobileOperatorManagementScreenState
     super.dispose();
   }
 
-  // ---------------------------------------------------------------------------
-  // Tab switching
-  // ---------------------------------------------------------------------------
+  // ── Tab ──
 
   void _onTabChanged(int index) {
     setState(() => _selectedTab = index);
-    // Unfocus search so keyboard doesn't stay up during tab switch
     _searchFocusNode.unfocus();
   }
 
-  // ---------------------------------------------------------------------------
-  // Search — routes to the correct notifier based on active tab
-  // ---------------------------------------------------------------------------
+  // ── Search ──
 
   void _handleSearch(String query) {
     if (_selectedTab == _kMembersTab) {
@@ -67,9 +61,7 @@ class _MobileOperatorManagementScreenState
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Bottom sheet flows — Members tab
-  // ---------------------------------------------------------------------------
+  // ── Members bottom sheets ──
 
   void _showMemberView(TeamMember member) {
     showModalBottomSheet(
@@ -100,9 +92,7 @@ class _MobileOperatorManagementScreenState
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Bottom sheet flows — Pending tab
-  // ---------------------------------------------------------------------------
+  // ── Pending bottom sheets ──
 
   void _showPendingView(PendingMember member) {
     showModalBottomSheet(
@@ -141,9 +131,7 @@ class _MobileOperatorManagementScreenState
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Dynamic header config — changes based on active tab
-  // ---------------------------------------------------------------------------
+  // ── Header config (loading state + filters) ──
 
   bool get _isLoading => _selectedTab == _kMembersTab
       ? ref.watch(teamMembersProvider).isLoading
@@ -180,21 +168,17 @@ class _MobileOperatorManagementScreenState
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Empty state configs
-  // ---------------------------------------------------------------------------
+  // ── Empty states ──
 
   EmptyStateConfig get _membersEmptyState {
     final state = ref.watch(teamMembersProvider);
-    final hasFilters = state.searchQuery.isNotEmpty ||
-        state.statusFilter != TeamMemberStatusFilter.all ||
-        state.dateFilter.isActive;
-
     return EmptyStateConfig(
       icon: Icons.people_outline,
-      message: hasFilters ? 'No members match your filters' : 'No team members found',
-      actionLabel: hasFilters ? 'Clear Filters' : null,
-      onAction: hasFilters
+      message: state.hasActiveFilters
+          ? 'No members match your filters'
+          : 'No team members found',
+      actionLabel: state.hasActiveFilters ? 'Clear Filters' : null,
+      onAction: state.hasActiveFilters
           ? () => ref.read(teamMembersProvider.notifier).refresh()
           : null,
     );
@@ -202,24 +186,19 @@ class _MobileOperatorManagementScreenState
 
   EmptyStateConfig get _pendingEmptyState {
     final state = ref.watch(pendingMembersProvider);
-    final hasFilters =
-        state.searchQuery.isNotEmpty || state.dateFilter.isActive;
-
     return EmptyStateConfig(
       icon: Icons.hourglass_empty_outlined,
-      message: hasFilters
+      message: state.hasActiveFilters
           ? 'No pending requests match your filters'
           : 'No pending requests found',
-      actionLabel: hasFilters ? 'Clear Filters' : null,
-      onAction: hasFilters
+      actionLabel: state.hasActiveFilters ? 'Clear Filters' : null,
+      onAction: state.hasActiveFilters
           ? () => ref.read(pendingMembersProvider.notifier).refresh()
           : null,
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // Card builders
-  // ---------------------------------------------------------------------------
+  // ── Card builders ──
 
   Widget _buildMemberCard(BuildContext context, TeamMember member, int index) {
     final style = getStatusStyle(member.status.value);
@@ -256,9 +235,7 @@ class _MobileOperatorManagementScreenState
   String _capitalize(String value) =>
       value.isEmpty ? value : value[0].toUpperCase() + value.substring(1);
 
-  // ---------------------------------------------------------------------------
-  // Main build
-  // ---------------------------------------------------------------------------
+  // ── Build ──
 
   @override
   Widget build(BuildContext context) {
@@ -280,9 +257,7 @@ class _MobileOperatorManagementScreenState
         color: AppColors.green100,
         child: CustomScrollView(
           slivers: [
-            // ----------------------------------------------------------------
-            // Header: Row 1 title | Row 2 tab selector | Row 3 search+filters
-            // ----------------------------------------------------------------
+            // Header: title + tab selector + search + filters
             MobileSliverHeader(
               title: 'Operator List',
               selectorWidgets: [
@@ -303,41 +278,40 @@ class _MobileOperatorManagementScreenState
               filterWidgets: _filterWidgets,
             ),
 
-            // Breathing room between header and list
             const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
-            // Members list (always built, hidden when pending tab is active)
+            // Members list — client-side paginated, infinite scroll
             if (_selectedTab == _kMembersTab)
               MobileListContent<TeamMember>(
                 isLoading: membersState.isLoading,
-                isInitialLoad: membersState.items.isEmpty,
+                isInitialLoad: membersState.allMembers.isEmpty,
                 hasError: false,
-                items: membersState.items,
-                displayedItems: membersState.filteredMembers,
-                hasMoreToLoad: membersState.hasNextPage,
-                remainingCount: 0,
+                items: membersState.allMembers,
+                displayedItems: membersState.displayedMembers,
+                hasMoreToLoad: membersState.hasMoreToLoad,
+                remainingCount: membersState.remainingCount,
                 emptyStateConfig: _membersEmptyState,
                 onRefresh: () async => membersNotifier.refresh(),
-                onLoadMore: membersNotifier.loadNextPage,
+                onLoadMore: membersNotifier.loadMoreItems,
                 onRetry: () => membersNotifier.refresh(),
                 itemBuilder: _buildMemberCard,
                 skeletonBuilder: (context, index) => const DataCardSkeleton(),
               ),
 
-            // Pending list (always built, hidden when members tab is active)
+            // Pending list — client-side paginated, infinite scroll
             if (_selectedTab == _kPendingTab)
               MobileListContent<PendingMember>(
                 isLoading: pendingState.isLoading,
-                isInitialLoad: pendingState.items.isEmpty,
+                isInitialLoad: pendingState.allMembers.isEmpty,
                 hasError: pendingState.isError,
                 errorMessage: pendingState.error?.toString(),
-                items: pendingState.items,
-                displayedItems: pendingState.items,
-                hasMoreToLoad: pendingState.hasNextPage,
-                remainingCount: 0,
+                items: pendingState.allMembers,
+                displayedItems: pendingState.displayedMembers,
+                hasMoreToLoad: pendingState.hasMoreToLoad,
+                remainingCount: pendingState.remainingCount,
                 emptyStateConfig: _pendingEmptyState,
                 onRefresh: () async => pendingNotifier.refresh(),
-                onLoadMore: pendingNotifier.loadNextPage,
+                onLoadMore: pendingNotifier.loadMoreItems,
                 onRetry: () => pendingNotifier.refresh(),
                 itemBuilder: _buildPendingCard,
                 skeletonBuilder: (context, index) => const DataCardSkeleton(),

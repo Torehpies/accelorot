@@ -10,6 +10,12 @@ abstract class TeamMemberService {
     required int pageIndex,
     DateFilterRange? dateFilter,
   });
+
+  Future<List<TeamMember>> fetchAllTeamMembers({
+    required String teamId,
+    DateFilterRange? dateFilter,
+  });
+
   Future<Result<void, DataLayerError>> updateTeamMember({
     required TeamMember member,
     required String teamId,
