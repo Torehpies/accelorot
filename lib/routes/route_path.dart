@@ -11,8 +11,10 @@ enum RoutePath {
   restricted(path: '/restricted'),
   forgotPassword(path: '/forgot-password'),
   resetEmailSent(path: '/reset-email-sent'),
+  completeProfile(path: '/complete-profile'),
 
   // operator paths
+
   operatorRestricted(path: '/operator/restricted'),
   dashboard(path: '/operator/dashboard'),
   activity(path: '/operator/activity'),

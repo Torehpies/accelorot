@@ -42,9 +42,11 @@ import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy
 import 'package:flutter_application_1/ui/onboarding/view/resent_email_sent_screen.dart';
 import 'package:flutter_application_1/ui/splashscreen/views/splash_screen_view.dart';
 import 'package:flutter_application_1/ui/qr_scan/view/qr_scan_screen.dart';
+import 'package:flutter_application_1/ui/social_login/view/complete_profile_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
+
 
   return GoRouter(
     refreshListenable: notifier,
@@ -94,7 +96,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RegistrationScreen(),
       ),
       GoRoute(
+        path: RoutePath.completeProfile.path,
+        name: RoutePath.completeProfile.name,
+        builder: (context, state) => const CompleteProfileScreen(),
+      ),
+      GoRoute(
         path: RoutePath.forgotPassword.path,
+
         name: RoutePath.forgotPassword.name,
         builder: (context, state) => const ForgotPassScreen(),
       ),

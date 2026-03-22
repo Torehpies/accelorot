@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/login/widgets/google_signin_button.dart';
-import 'package:flutter_application_1/ui/login/widgets/or_divider.dart';
+import 'package:flutter_application_1/ui/core/widgets/google_signin_button.dart';
+import 'package:flutter_application_1/ui/core/widgets/or_divider.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/primary_button.dart';
 import 'package:flutter_application_1/ui/login/view_model/login_notifier.dart';

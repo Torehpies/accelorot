@@ -122,6 +122,11 @@ class RegistrationNotifier extends _$RegistrationNotifier {
 
   void validateForm() {
     final valid =
+        state.email.isNotEmpty &&
+        state.firstName.isNotEmpty &&
+        state.lastName.isNotEmpty &&
+        state.password.isNotEmpty &&
+        state.confirmPassword.isNotEmpty &&
         state.emailError == null &&
         state.firstNameError == null &&
         state.lastNameError == null &&

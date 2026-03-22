@@ -1,12 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
-import 'package:flutter_application_1/data/services/contracts/result.dart';
 import 'package:flutter_application_1/data/utils/result.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_state.dart';
-import 'package:flutter_application_1/utils/ui_message.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'team_management_notifier.g.dart';
@@ -19,60 +16,6 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
     state = initial;
     Future.microtask(() => _loadPage(0));
     return const TeamManagementState();
-  }
-
-  Future<void> addTeam(String teamName, String address) async {
-    final user = ref.read(appUserProvider).value;
-
-    teamName = teamName.trim();
-    address = address.trim();
-
-    if (teamName.isEmpty || address.isEmpty) {
-      return;
-    }
-
-    state = state.copyWith(isSavingTeams: true);
-
-    final team = Team.fromJson({
-      'teamName': teamName,
-      'address': address,
-      'createdBy': user?.uid,
-    });
-
-    try {
-      final result = await ref
-          .read(teamRepositoryProvider)
-          .addTeam(team)
-          .timeout(const Duration(seconds: 30));
-
-      result.when(
-        success: (resultTeam) async {
-          await refresh();
-          state = state.copyWith(
-            isSavingTeams: false,
-            message: UiMessage.success('Team $teamName added successfully!'),
-          );
-        },
-        failure: (e) {
-          state = state.copyWith(
-            isSavingTeams: false,
-            message: UiMessage.error(e.userFriendlyMessage),
-          );
-        },
-      );
-    } on TimeoutException {
-      state = state.copyWith(
-        isSavingTeams: false,
-        message: const UiMessage.error(
-          'Request timed out. Please check your connection.',
-        ),
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isSavingTeams: false,
-        message: UiMessage.error('Unexpected error: $e'),
-      );
-    }
   }
 
   static const _cacheTtl = Duration(minutes: 1);
@@ -117,8 +60,6 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
       teams: teams,
       currentPage: pageIndex,
       isLoading: false,
-      // isError: false,
-      // error: null,
       hasNextPage: teams.length == state.pageSize,
       pagesByIndex: updatedPages,
       lastFetchedAt: DateTime.now(),
@@ -128,8 +69,6 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
   void _handleError(Exception error) {
     state = state.copyWith(
       isLoading: false,
-      // isError: true,
-      // error: error,
       teams: [],
     );
   }

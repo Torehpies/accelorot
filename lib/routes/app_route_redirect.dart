@@ -37,8 +37,9 @@ String? appRouteRedirect(BuildContext context, Ref ref, GoRouterState state) {
         ? null
         : RoutePath.verifyEmail.path,
     missingUserDoc: (_) =>
-        currentPath == RoutePath.signup.path ? null : RoutePath.teamSelect.path,
+        currentPath == RoutePath.completeProfile.path ? null : RoutePath.completeProfile.path,
     authenticated: (firebaseUser, userDoc, status, globalRole, teamRole) {
+
       switch (status) {
         case UserStatus.approval:
           return currentPath == RoutePath.approval.path

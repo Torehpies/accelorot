@@ -271,74 +271,81 @@ class AuthRepositoryRemote implements AuthRepository {
     }
   }
 
-  Future<Result<void, DataLayerError>> saveGoogleUserToFirestore(
-    UserCredential credential,
+
+  @override
+  Future<Result<void, DataLayerError>> createUserDocIfNull(
+
+    UserCredential userCredential,
   ) async {
+    // We intentionally do nothing here to allow the user to reach the
+    // "Complete Profile" screen if their document is missing.
+    // The previous implementation auto-created a document, which bypassed the form.
+    return Result.success(null);
+  }
+
+  @override
+  Future<Result<void, DataLayerError>> completeSocialLogin({
+    required String firstName,
+    required String lastName,
+    required String teamId,
+  }) async {
     try {
-      final user = credential.user;
-      if (user == null) return Result.failure(DataLayerError.dataEmptyError());
-      if (user.email == null) {
-        return Result.failure(DataLayerError.dataEmptyError());
-      }
-      if (user.displayName == null) {
-        return Result.failure(DataLayerError.dataEmptyError());
-      }
+      final user = _firebaseAuth.currentUser;
+      if (user == null) return Result.failure(DataLayerError.userNullError());
 
-      final names = user.displayName?.split(' ');
-      final firstName = (names?.isNotEmpty ?? false)
-          ? names?.first
-          : (user.email?.split('@').first);
-      final lastName = names!.length > 1 ? names.sublist(1).join(' ') : '';
+      await _authService.updateDisplayName(user, "$firstName $lastName");
 
+      final token = await _pushNotificationService.getDeviceToken();
+      
+      // Create the user profile directly
       final profileResult = await _userRepository.createUserProfile(
         uid: user.uid,
         email: user.email ?? '',
-        firstName: firstName ?? '',
+        firstName: firstName,
         lastName: lastName,
-        globalRole: "User",
-        status: UserStatus.teamSelect.value,
+        globalRole: 'User', // Default role
+        status: UserStatus.pending.value,
+        requestTeamId: teamId,
       );
+
+      if (token != null) {
+        await _userService.updateUserField(user.uid, {'fcmToken': token});
+      }
 
       if (profileResult.isFailure) {
         return Result.failure(profileResult.asFailure);
       }
 
-      return Result.success(null);
-    } on FirebaseException catch (e) {
-      return Result.failure(mapFirebaseAuthException(e));
+      // Add request in pending members
+      final pendingAdd = await _pendingMemberService.addPendingMember(
+        teamId: teamId,
+        memberId: user.uid,
+        memberEmail: user.email ?? '',
+        firstName: firstName,
+        lastName: lastName,
+      );
+
+      if (pendingAdd.isFailure) return Result.failure(pendingAdd.asFailure);
+
+      final teamResult = await _teamService.incrementTeamField(
+        teamId: teamId,
+        field: OperatorHeaders.pendingOperators,
+        amount: 1,
+      );
+
+      if (teamResult is result.Error<String>) {
+        return Result.failure(teamResult.error as DataLayerError);
+      }
+      
+      return const Result.success(null);
     } catch (e) {
-      return Result.failure(DataLayerError.unknownError());
+      debugPrint('Error completing social login: $e');
+      return Result.failure(DataLayerError.unknownError(e));
     }
   }
 
   @override
-  Future<Result<void, DataLayerError>> createUserDocIfNull(
-    UserCredential userCredential,
-  ) async {
-    final user = await _userService.getAppUserAsync(userCredential.user!.uid);
 
-    user.when(
-      success: (success) {
-        return Result.success(null);
-      },
-      failure: (failure) async {
-        if (failure == DataLayerError.userNullError()) {
-          final saveUserResult = await saveGoogleUserToFirestore(
-            userCredential,
-          );
-
-          saveUserResult.when(
-            success: (success) => Result.success(success),
-            failure: (failure) => Result.failure(failure),
-          );
-        }
-        return Result.failure(failure);
-      },
-    );
-    return Result.success(null);
-  }
-
-  @override
   Future<Map<String, dynamic>> sendPasswordResetEmail(String email) async {
     try {
       await _firebaseAuth.sendPasswordResetEmail(email: email);
