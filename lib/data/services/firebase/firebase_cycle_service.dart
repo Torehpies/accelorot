@@ -109,7 +109,10 @@ class FirestoreCycleService implements CycleService {
     final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
     if (teamMachineIds.isEmpty) return [];
 
-    final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+    final batches = await _batchService.getBatchesForMachines(
+      teamMachineIds,
+      cutoffDate: cutoffDate,
+    );
     if (batches.isEmpty) return [];
 
     //debugPrint(

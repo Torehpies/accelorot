@@ -54,7 +54,10 @@ class FirestoreAlertService implements AlertService {
       }
 
       // 2. Get all batches for these machines
-      final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+      final batches = await _batchService.getBatchesForMachines(
+        teamMachineIds,
+        cutoffDate: cutoffDate,
+      );
 
       if (batches.isEmpty) {
         return [];

@@ -162,8 +162,9 @@ class FirestoreBatchService implements BatchService {
   /// Handles Firestore's whereIn limit of 10 items by chunking
   @override
   Future<List<QueryDocumentSnapshot>> getBatchesForMachines(
-    List<String> machineIds,
-  ) async {
+    List<String> machineIds, {
+    DateTime? cutoffDate,
+  }) async {
     if (machineIds.isEmpty) return [];
 
     try {
@@ -173,13 +174,28 @@ class FirestoreBatchService implements BatchService {
       for (int i = 0; i < machineIds.length; i += firestoreWhereinLimit) {
         final chunk = machineIds.skip(i).take(firestoreWhereinLimit).toList();
 
-        final querySnapshot = await _batches
+        var query = _batches
             .where('machineId', whereIn: chunk)
-            //.where('isActive', isEqualTo: true)
-            .orderBy('createdAt', descending: true)
-            .get();
+            .orderBy('createdAt', descending: true);
 
-        allDocs.addAll(querySnapshot.docs);
+        final querySnapshot = await query.get();
+
+        // If cutoffDate is provided, filter out batches that COMPLETED before the cutoff.
+        // Active batches (completedAt == null) are always included.
+        var docs = querySnapshot.docs.toList();
+        if (cutoffDate != null) {
+          docs = docs.where((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            final completedTimestamp = data['completedAt'] as Timestamp?;
+            if (completedTimestamp == null) return true; // Batch is still active
+            
+            // If completed after or on the cutoff, include it. Otherwise discard.
+            final completedDate = completedTimestamp.toDate();
+            return completedDate.isAfter(cutoffDate) || completedDate.isAtSameMomentAs(cutoffDate);
+          }).toList();
+        }
+
+        allDocs.addAll(docs);
       }
 
       return allDocs;
