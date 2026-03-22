@@ -20,7 +20,6 @@ class WebAdminHomeView extends ConsumerStatefulWidget {
 class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
   @override
   Widget build(BuildContext context) {
-    /// ✅ Watch AsyncValue state
     final asyncState = ref.watch(adminHomeProvider);
     final activitiesAsync = ref.watch(userTeamActivitiesProvider);
 
@@ -51,7 +50,13 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
               ],
             ),
           ),
-          data: (state) => _buildDashboard(state, activitiesAsync),
+          data: (state) => activitiesAsync.when(
+            loading: () => const Center(
+              child: CircularProgressIndicator(color: Color(0xFF4CAF50)),
+            ),
+            error: (err, _) => Center(child: Text('Error: $err')),
+            data: (activities) => _buildDashboard(state, activities),
+          ),
         ),
       ),
     );
@@ -59,7 +64,7 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
 
   Widget _buildDashboard(
     AdminHomeState state,
-    AsyncValue<List<ActivityLogItem>> activitiesAsync,
+    List<ActivityLogItem> activities,
   ) {
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -144,20 +149,10 @@ class _WebAdminHomeViewState extends ConsumerState<WebAdminHomeView> {
                             ),
                           ),
                           const SizedBox(height: 8),
-                          // Activity Overview chart
+                          // Activity Overview chart — synced with stat cards
                           Expanded(
-                            child: activitiesAsync.when(
-                              data: (activities) {
-                                final chartData = _groupActivitiesByDay(
-                                  activities,
-                                );
-                                return ActivityChart(activities: chartData);
-                              },
-                              loading: () => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              error: (err, _) =>
-                                  Center(child: Text('Error: $err')),
+                            child: ActivityChart(
+                              activities: _groupActivitiesByDay(activities),
                             ),
                           ),
                         ],
