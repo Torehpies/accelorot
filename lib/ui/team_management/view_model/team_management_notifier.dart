@@ -33,6 +33,7 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
       state = state.copyWith(
         currentPage: pageIndex,
         teams: cachedPage,
+        hasNextPage: cachedPage.length == state.pageSize,
         isLoading: false,
       );
       return;
