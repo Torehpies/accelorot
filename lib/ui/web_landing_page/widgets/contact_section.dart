@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../dialogs/terms_of_service_dialog.dart';
-import '../dialogs/privacy_policy_dialog.dart';
+import '../dialogs/policy_bottom_sheet.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 
@@ -50,16 +50,10 @@ class ContactSection extends StatelessWidget {
   void _handleLinkNavigation(BuildContext context, String linkText) {
     switch (linkText) {
       case 'Privacy Policy':
-        showDialog(
-          context: context,
-          builder: (context) => const PrivacyPolicyDialog(),
-        );
+        PrivacyPolicyDialog.showModal(context);
         break;
       case 'Terms of Service':
-        showDialog(
-          context: context,
-          builder: (context) => const TermsOfServiceDialog(),
-        );
+        TermsOfServiceDialog.showModal(context);
         break;
       case 'Features':
         onNavigateToSection?.call('features');
@@ -296,7 +290,7 @@ class ContactSection extends StatelessWidget {
   }
 }
 
-// ==================== Helper Widgets ====================
+//Helper Widgets
 
 class _FooterColumn extends StatelessWidget {
   final String title;

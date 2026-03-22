@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_colors.dart';
-import '../buttons/header_button.dart'; 
+import '../buttons/header_button.dart';
 
 class WebHeader extends StatefulWidget {
   final VoidCallback? onLogin;
@@ -37,9 +37,8 @@ class _WebHeaderState extends State<WebHeader> {
     final screenWidth = MediaQuery.of(context).size.width;
     final isTablet = screenWidth >= 768 && screenWidth < 1024;
 
-    // Reduced sizes
     final horizontalPadding = isTablet ? AppSpacing.md : AppSpacing.xxl;
-    final headerHeight = 72.0;
+    const headerHeight = 72.0;
     final logoSize = isTablet ? 32.0 : 40.0;
     final appNameLogoWidth = isTablet ? 80.0 : 100.0;
     final showAppName = screenWidth > 280;
@@ -78,63 +77,54 @@ class _WebHeaderState extends State<WebHeader> {
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Logo + Name SVG section with hover effect
-            Flexible(
-              flex: 1,
-              child: MouseRegion(
-                cursor: SystemMouseCursors.click,
-                onEnter: (_) => setState(() => _isLogoHovered = true),
-                onExit: (_) => setState(() => _isLogoHovered = false),
-                child: GestureDetector(
-                  onTap: () => widget.onBreadcrumbTap?.call('home'),
-                  child: AnimatedScale(
-                    duration: const Duration(milliseconds: 200),
-                    scale: _isLogoHovered ? 1.05 : 1.0,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          child: SvgPicture.asset(
-                            'assets/images/Accelorot_logo.svg',
-                            width: logoSize,
-                            height: logoSize,
-                            fit: BoxFit.contain,
+            // ── Logo + Name ──────────────────────────────────────────────
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              onEnter: (_) => setState(() => _isLogoHovered = true),
+              onExit: (_) => setState(() => _isLogoHovered = false),
+              child: GestureDetector(
+                onTap: () => widget.onBreadcrumbTap?.call('home'),
+                child: AnimatedScale(
+                  duration: const Duration(milliseconds: 200),
+                  scale: _isLogoHovered ? 1.05 : 1.0,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/images/Accelorot_logo.svg',
+                        width: logoSize,
+                        height: logoSize,
+                        fit: BoxFit.contain,
+                      ),
+                      if (showAppName) ...[
+                        const SizedBox(width: AppSpacing.xs),
+                        SvgPicture.asset(
+                          'assets/images/Accelorot_name.svg',
+                          width: appNameLogoWidth,
+                          height: logoSize,
+                          fit: BoxFit.contain,
+                          colorFilter: ColorFilter.mode(
+                            _isLogoHovered
+                                ? const Color(0xFF22C55E)
+                                : WebColors.buttonsPrimary,
+                            BlendMode.srcIn,
                           ),
                         ),
-                        if (showAppName) ...[
-                          const SizedBox(width: AppSpacing.xs),
-                          Flexible(
-                            child: SvgPicture.asset(
-                              'assets/images/Accelorot_name.svg',
-                              width: appNameLogoWidth,
-                              height: logoSize,
-                              fit: BoxFit.contain,
-                              colorFilter: ColorFilter.mode(
-                                _isLogoHovered
-                                    ? const Color(0xFF22C55E)
-                                    : WebColors.buttonsPrimary,
-                                BlendMode.srcIn,
-                              ),
-                            ),
-                          ),
-                        ],
                       ],
-                    ),
+                    ],
                   ),
                 ),
               ),
             ),
-            
-            // Breadcrumbs navigation
-            if (widget.onBreadcrumbTap != null)
-              Flexible(
-                flex: 3,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  physics: const ClampingScrollPhysics(),
+
+            // ── Breadcrumbs — shrinks via FittedBox, never scrolls ───────
+            if (widget.onBreadcrumbTap != null) ...[
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -198,13 +188,16 @@ class _WebHeaderState extends State<WebHeader> {
                   ),
                 ),
               ),
-            
-            // ✅ Updated: Login and Get Started buttons using HeaderButton
-            if (widget.showActions && widget.onLogin != null && widget.onGetStarted != null)
+              const SizedBox(width: AppSpacing.sm),
+            ],
+
+            // ── Action Buttons ────────────────────────────────────────────
+            if (widget.showActions &&
+                widget.onLogin != null &&
+                widget.onGetStarted != null)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Sign In / Login button (outline style)
                   HeaderButton(
                     text: 'Login',
                     type: HeaderButtonType.outline,
@@ -214,7 +207,6 @@ class _WebHeaderState extends State<WebHeader> {
                     fontSize: isTablet ? 13 : 14,
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  // Get Started button (filled style)
                   HeaderButton(
                     text: 'Get Started',
                     type: HeaderButtonType.filled,
@@ -257,8 +249,6 @@ class _BreadcrumbItemState extends State<_BreadcrumbItem> {
   @override
   Widget build(BuildContext context) {
     final bool isActive = widget.active == widget.id;
-    final double paddingVertical = widget.fontSize < 14 ? 4 : 6;
-    final double paddingHorizontal = widget.fontSize < 14 ? 3 : 5;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -266,19 +256,19 @@ class _BreadcrumbItemState extends State<_BreadcrumbItem> {
       onExit: (_) => setState(() => _isHovered = false),
       child: GestureDetector(
         onTap: () => widget.onTap(widget.id),
-        child: Container(
+        child: Padding(
           padding: EdgeInsets.symmetric(
-            vertical: paddingVertical,
-            horizontal: paddingHorizontal,
+            vertical: widget.fontSize < 14 ? 4.0 : 6.0,
+            horizontal: widget.fontSize < 14 ? 3.0 : 5.0,
           ),
           child: Text(
             widget.label,
             maxLines: 1,
-            overflow: TextOverflow.visible,
             softWrap: false,
             style: TextStyle(
               fontSize: widget.fontSize,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
+              fontWeight:
+                  isActive ? FontWeight.w600 : FontWeight.w500,
               color: isActive
                   ? const Color(0xFF22C55E)
                   : _isHovered
@@ -300,9 +290,7 @@ class _Chevron extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: size < 16 ? 5 : 8,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: size < 16 ? 3.0 : 5.0),
       child: Icon(
         Icons.chevron_right,
         size: size,

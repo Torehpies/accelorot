@@ -106,13 +106,10 @@ class _DownloadAppState extends State<DownloadApp> {
     );
   }
 
-  // ───────────────────────────────────────────────────────────
-  // Desktop Layout: Split Row (Content | Mockup)
-  // ───────────────────────────────────────────────────────────
+
   Widget _buildDesktopLayout() {
     return Row(
       children: [
-        // LEFT: Content Section (flex: 3)
         Expanded(
           flex: 3,
           child: Container(
@@ -199,7 +196,6 @@ class _DownloadAppState extends State<DownloadApp> {
           ),
         ),
 
-        // RIGHT: Mockup Image (flex: 2)
         Expanded(
           flex: 2,
           child: Container(
@@ -229,9 +225,7 @@ class _DownloadAppState extends State<DownloadApp> {
     );
   }
 
-  // ───────────────────────────────────────────────────────────
-  // Mobile Layout: Stacked (Content on Top | Mockup Below)
-  // ───────────────────────────────────────────────────────────
+
   Widget _buildMobileLayout() {
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
@@ -350,9 +344,6 @@ class _DownloadAppState extends State<DownloadApp> {
   }
 }
 
-// ───────────────────────────────────────────────────────────
-// Mobile Menu (unchanged from original, kept for functionality)
-// ───────────────────────────────────────────────────────────
 class _MobileMenu extends StatelessWidget {
   final VoidCallback onLogin;
   final VoidCallback onGetStarted;

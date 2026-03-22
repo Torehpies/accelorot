@@ -23,8 +23,10 @@ class FeaturesSection extends StatefulWidget {
 class FeaturesSectionState extends State<FeaturesSection> {
   late PageController _pageController;
   int _currentIndex = 0;
-  double _currentPage = 0.0;
   Timer? _autoScrollTimer;
+
+  // Track the last fraction so we can rebuild on significant size change
+  double _lastFraction = 0.45;
 
   final List<String> featureImages = [
     'assets/images/Mobile Dashboard.png',
@@ -35,42 +37,69 @@ class FeaturesSectionState extends State<FeaturesSection> {
     'assets/images/Sustainable Composting.png',
   ];
 
+  double _fractionForWidth(double w) {
+    if (w < 480) return 0.85;
+    if (w < 768) return 0.75;
+    if (w < 1024) return 0.60;
+    return 0.45;
+  }
+
+  double _carouselHeightForWidth(double w) {
+    if (w < 480) return 340;
+    if (w < 768) return 400;
+    if (w < 1024) return 460;
+    return 520;
+  }
+
   @override
   void initState() {
     super.initState();
-    // Increased viewportFraction from 0.25 to 0.45 for larger visible images
-    _pageController = PageController(viewportFraction: 0.45);
-    _pageController.addListener(() {
-      if (!mounted) return;
-      setState(() {
-        _currentPage = _pageController.page ?? 0.0;
-        _currentIndex = _currentPage.round();
-      });
-    });
+    _pageController = PageController(viewportFraction: _lastFraction);
+    _pageController.addListener(_onPageChanged);
     _startAutoScroll();
   }
 
-  void _startAutoScroll() {
-    _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (!mounted) return;
-      if (_pageController.hasClients) {
-        final nextPage = (_currentIndex + 1) % featureImages.length;
-        _pageController.animateToPage(
-          nextPage,
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.easeInOut,
-        );
-      }
+  void _onPageChanged() {
+    if (!mounted) return;
+    setState(() {
+      _currentIndex = (_pageController.page ?? 0).round();
     });
   }
 
-  void _stopAutoScroll() {
-    _autoScrollTimer?.cancel();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final w = MediaQuery.of(context).size.width;
+    final newFraction = _fractionForWidth(w);
+    if ((newFraction - _lastFraction).abs() > 0.05) {
+      _lastFraction = newFraction;
+      final savedIndex = _currentIndex;
+      _pageController.removeListener(_onPageChanged);
+      _pageController.dispose();
+      _pageController =
+          PageController(viewportFraction: newFraction, initialPage: savedIndex);
+      _pageController.addListener(_onPageChanged);
+    }
   }
+
+  void _startAutoScroll() {
+    _autoScrollTimer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted || !_pageController.hasClients) return;
+      final next = (_currentIndex + 1) % featureImages.length;
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 800),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  void _stopAutoScroll() => _autoScrollTimer?.cancel();
 
   @override
   void dispose() {
     _stopAutoScroll();
+    _pageController.removeListener(_onPageChanged);
     _pageController.dispose();
     super.dispose();
   }
@@ -78,18 +107,21 @@ class FeaturesSectionState extends State<FeaturesSection> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 600;
+    final carouselHeight = _carouselHeightForWidth(screenWidth);
+
+    // Reduced horizontal & vertical padding for tighter layout
+    final hPad = screenWidth > 1200
+        ? AppSpacing.xxxl * 2.0
+        : AppSpacing.xl;
+    const vPad = AppSpacing.xxxl;
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth > 1200 ? AppSpacing.xxxl * 2 : AppSpacing.xl,
-        vertical: AppSpacing.xxxl * 1.5,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
       color: Colors.white,
       child: Column(
         children: [
-          // TITLE
+          // ── Title ─────────────────────────────────────────────────────
           RichText(
             textAlign: TextAlign.center,
             text: TextSpan(
@@ -103,53 +135,48 @@ class FeaturesSectionState extends State<FeaturesSection> {
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.md),
+          
+          const SizedBox(height: AppSpacing.xs),
+          
           Text(
             'Our IoT-enabled system combines automation, monitoring, and AI Chatbot',
             textAlign: TextAlign.center,
             style: WebTextStyles.subtitle,
           ),
-          const SizedBox(height: AppSpacing.xl * 1.5),
+          
+          const SizedBox(height: AppSpacing.sm),
 
-          // CAROUSEL - Images only with increased size
+          // ── Carousel ──────────────────────────────────────────────────
           SizedBox(
-            // Increased height for larger images
-            height: isMobile ? 420 : 580,
+            height: carouselHeight,
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // PageView with images only
                 PageView.builder(
                   controller: _pageController,
                   itemCount: featureImages.length,
-                  onPageChanged: (index) {
-                    if (mounted) {
-                      setState(() => _currentIndex = index);
-                    }
-                  },
-                  itemBuilder: (context, index) {
-                    return _buildImageCard(index, isMobile);
-                  },
+                  onPageChanged: (i) =>
+                      setState(() => _currentIndex = i),
+                  itemBuilder: (ctx, i) =>
+                      _buildImageCard(i, carouselHeight),
                 ),
 
-                // INDICATORS - Modern dots at bottom
+                // Dot indicators — rendered OVER the carousel
                 Positioned(
-                  bottom: isMobile ? 16 : 24,
+                  bottom: 8,
                   left: 0,
                   right: 0,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       featureImages.length,
-                      (index) => AnimatedContainer(
+                      (i) => AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.symmetric(horizontal: 6),
-                        width: _currentIndex == index 
-                            ? (isMobile ? 32 : 40) 
-                            : 10,
-                        height: _currentIndex == index ? 10 : 10,
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        width: _currentIndex == i ? 36 : 10,
+                        height: 10,
                         decoration: BoxDecoration(
-                          color: _currentIndex == index 
+                          color: _currentIndex == i
                               ? const Color(0xFF2D3748)
                               : Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(5),
@@ -161,14 +188,14 @@ class FeaturesSectionState extends State<FeaturesSection> {
               ],
             ),
           ),
-
-          const SizedBox(height: AppSpacing.xl),
+          
+          const SizedBox(height: AppSpacing.sm),
         ],
       ),
     );
   }
 
-  Widget _buildImageCard(int index, bool isMobile) {
+  Widget _buildImageCard(int index, double carouselHeight) {
     return AnimatedBuilder(
       animation: _pageController,
       builder: (context, child) {
@@ -178,11 +205,9 @@ class FeaturesSectionState extends State<FeaturesSection> {
 
         if (_pageController.position.haveDimensions) {
           final value = (_pageController.page! - index).abs();
-          
-          // Adjusted scale curve for more prominent active image
-          scale = (1 - (value * 0.25)).clamp(0.85, 1.0);
-          opacity = (1 - (value * 0.4)).clamp(0.6, 1.0);
-          yOffset = value * 15;
+          scale = (1 - value * 0.22).clamp(0.88, 1.0);
+          opacity = (1 - value * 0.35).clamp(0.65, 1.0);
+          yOffset = value * 10;
         }
 
         return Center(
@@ -193,33 +218,27 @@ class FeaturesSectionState extends State<FeaturesSection> {
               child: Opacity(
                 opacity: opacity,
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Image.asset(
-                    featureImages[index],
-                    // Changed to BoxFit.scaleDown for better high-res handling
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.center,
-                    // Added cacheWidth/cacheHeight for better performance with large images
-                    cacheWidth: isMobile ? 600 : 1200,
-                    cacheHeight: isMobile ? 400 : 800,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: isMobile ? 280 : 500,
-                        height: isMobile ? 350 : 600,
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 24),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      featureImages[index],
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => Container(
                         decoration: BoxDecoration(
                           color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.grey.shade300),
                         ),
                         child: Center(
                           child: Icon(
                             Icons.broken_image_outlined,
-                            size: isMobile ? 56 : 80,
+                            size: 64,
                             color: Colors.grey.shade400,
                           ),
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ),
               ),
