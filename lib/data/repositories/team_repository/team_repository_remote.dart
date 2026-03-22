@@ -27,6 +27,14 @@ class TeamRepositoryRemote implements TeamRepository {
   List<Team>? _cachedTeams;
 
   @override
+  Future<result.Result<List<Team>>> fetchTeamsPage({
+    required int pageSize,
+    required int pageIndex,
+  }) {
+    return _teamService.fetchTeamsPage(pageSize: pageSize, pageIndex: pageIndex);
+  }
+
+  @override
   Future<Team> addTeam(Team team) async {
     try {
       final docRef = _firestore.collection('teams').doc();
