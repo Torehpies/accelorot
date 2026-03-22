@@ -103,7 +103,6 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
       currentPage: 0,
       pagesByIndex: {}, 
       lastFetchedAt: null,
-      isLoading: true
     );
     
     await _loadPage(0);
