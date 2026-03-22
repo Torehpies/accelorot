@@ -60,3 +60,13 @@ Stream<String?> currentUserTeamId(Ref ref) async* {
     yield user?.teamId;
   }
 }
+
+/// Live member counts by status (active, archived, removed, pending/approval).
+/// Replaces the stale Firestore counter fields which can drift out of sync.
+@riverpod
+Future<Map<String, int>> teamMemberCounts(Ref ref) async {
+  final teamUser = ref.watch(appUserProvider).value;
+  final teamId = teamUser?.teamId;
+  if (teamId == null) return {};
+  return ref.read(teamMemberServiceProvider).fetchMemberCountsByStatus(teamId);
+}

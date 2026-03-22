@@ -47,6 +47,28 @@ class FirebaseTeamMemberService extends TeamMemberService {
   }
 
   @override
+  Future<Map<String, int>> fetchMemberCountsByStatus(String teamId) async {
+    try {
+      final snapshot = await _membersRef(teamId).get();
+      final counts = <String, int>{
+        'active': 0,
+        'archived': 0,
+        'removed': 0,
+        'pending': 0,
+        'approval': 0,
+      };
+      for (final doc in snapshot.docs) {
+        final status = (doc.data()['status'] as String? ?? 'active').toLowerCase();
+        counts[status] = (counts[status] ?? 0) + 1;
+      }
+      return counts;
+    } catch (e) {
+      debugPrint('fetchMemberCountsByStatus error: $e');
+      return {};
+    }
+  }
+
+  @override
   Future<Result<void, DataLayerError>> updateTeamMember({
     required TeamMember member,
     required String teamId,

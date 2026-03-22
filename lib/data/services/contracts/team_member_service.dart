@@ -14,4 +14,6 @@ abstract class TeamMemberService {
     required TeamMember member,
     required String teamId,
   });
+  /// Returns a map of status string → count for all members of the given team.
+  Future<Map<String, int>> fetchMemberCountsByStatus(String teamId);
 }
