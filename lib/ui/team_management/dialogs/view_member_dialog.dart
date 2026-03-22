@@ -1,8 +1,11 @@
+// lib/ui/team_management/dialogs/view_member_dialog.dart
+
 import 'package:flutter/material.dart';
-import 'package:flutter_application_1/ui/core/widgets/dialog_shell.dart';
-import 'package:flutter_application_1/ui/core/widgets/fields/read_only_field.dart';
-import 'package:flutter_application_1/utils/format.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog/base_dialog.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog/dialog_action.dart';
+import 'package:flutter_application_1/ui/core/widgets/dialog/dialog_fields.dart';
+import 'package:flutter_application_1/utils/format.dart';
 import 'package:flutter_application_1/utils/roles.dart';
 
 class ViewMemberDialog extends StatelessWidget {
@@ -12,64 +15,45 @@ class ViewMemberDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final label = member.teamRole == TeamRole.admin ? "Admin" : "Member";
-    return DialogShell(
-      title: Text(
-        '$label Details',
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('View in-depth information about this ${label.toLowerCase()}.'),
-          const Divider(thickness: 1, height: 24),
-          const SizedBox(height: 5),
-          _buildDetailsFields(context),
+    final label = member.teamRole == TeamRole.admin ? 'Admin' : 'Member';
+
+    return BaseDialog(
+      title: '${member.firstName} ${member.lastName}',
+      subtitle: '$label Details',
+      maxHeightFactor: 0.6,
+      content: ReadOnlySection(
+        fields: [
+          ReadOnlyField(
+            label: 'First Name',
+            value: member.firstName,
+          ),
+          ReadOnlyField(
+            label: 'Last Name',
+            value: member.lastName,
+          ),
+          ReadOnlyField(
+            label: 'Email',
+            value: member.email,
+          ),
+          ReadOnlyField(
+            label: 'Role',
+            value: label,
+          ),
+          ReadOnlyField(
+            label: 'Status',
+            value: toTitleCase(member.status.value),
+          ),
+          ReadOnlyField(
+            label: 'Added At',
+            value: formatDate(member.addedAt),
+          ),
         ],
       ),
       actions: [
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
+        DialogAction.secondary(
+          label: 'Close',
+          onPressed: () => Navigator.of(context).pop(),
         ),
-      ],
-    );
-  }
-
-  Widget _buildDetailsFields(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: ReadOnlyField(
-                  label: 'First Name',
-                  value: member.firstName,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ReadOnlyField(
-                  label: 'Last Name',
-                  value: member.lastName,
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        ReadOnlyField(label: 'Email', value: member.email),
-        const SizedBox(height: 16),
-
-        ReadOnlyField(label: 'Status', value: toTitleCase(member.status.value)),
-        const SizedBox(height: 16),
-
-        ReadOnlyField(label: 'Added At', value: formatDate(member.addedAt)),
       ],
     );
   }
