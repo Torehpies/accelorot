@@ -23,7 +23,7 @@ ReportAggregatorService mobileReportsAggregatorService(Ref ref) {
 class MobileReportsViewModel extends _$MobileReportsViewModel {
   static const int _loadMoreIncrement = 5;
   
-  late final ReportAggregatorService _aggregator;
+  late ReportAggregatorService _aggregator;
 
   @override
   MobileReportsState build() {

@@ -25,7 +25,7 @@ part 'unified_activity_viewmodel.g.dart';
 // Keep provider alive across navigation - prevents disposal and refetch
 @Riverpod(keepAlive: true)
 class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
-  late final ActivityAggregatorService _aggregator;
+  late ActivityAggregatorService _aggregator;
   
   // ===== STREAM SUBSCRIPTIONS FOR REAL-TIME UPDATES =====
   StreamSubscription<List<Alert>>? _alertsSubscription;

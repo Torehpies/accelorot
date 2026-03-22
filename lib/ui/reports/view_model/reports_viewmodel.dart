@@ -13,8 +13,8 @@ part 'reports_viewmodel.g.dart';
 
 @Riverpod(keepAlive: true)
 class ReportsViewModel extends _$ReportsViewModel {
-  late final ReportAggregatorService _aggregator;
-  late final ReportFilterService _filterService;
+  late ReportAggregatorService _aggregator;
+  late ReportFilterService _filterService;
 
   @override
   ReportsState build() {

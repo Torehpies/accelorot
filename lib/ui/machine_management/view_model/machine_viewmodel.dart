@@ -21,8 +21,8 @@ MachineAggregatorService machineAggregatorService(Ref ref) {
 
 @Riverpod(keepAlive: true)
 class MachineViewModel extends _$MachineViewModel {
-  late final MachineAggregatorService _aggregator;
-  late final MachineFilterService _filterService;
+  late MachineAggregatorService _aggregator;
+  late MachineFilterService _filterService;
 
   String? _currentTeamId;
 
