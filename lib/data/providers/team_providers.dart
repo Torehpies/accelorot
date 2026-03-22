@@ -40,7 +40,7 @@ PendingMembersService pendingMembersService(Ref ref) {
   return FirebasePendingMembersService(ref.read(firebaseFirestoreProvider));
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<Team> currentTeam(Ref ref) async {
   final teamUser = ref.watch(appUserProvider).value;
   final teamId = teamUser?.teamId;

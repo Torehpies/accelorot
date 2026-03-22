@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 // lib/data/providers/activity_providers.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,7 +60,6 @@ final allActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   final result = await aggregator.getAllActivitiesWithCache(
     limit: 50,
     filterRecentDays: 7,
-    forceRefresh: true,
   );
   return result.items;
 });
@@ -107,15 +107,23 @@ final userTeamActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   final profileRepo = ref.watch(profileRepositoryProvider);
   final batchRepo = ref.watch(batchRepositoryProvider);
 
-  // Get user's team
+  // Start fetching activities immediately (doesn't depend on teamId yet)
+  final sw = Stopwatch()..start();
+  final activitiesFuture = aggregator.getAllActivitiesWithCache(
+    limit: 50,
+    filterRecentDays: 7,
+  );
+
+  // Get user's team concurrently
   final profile = await profileRepo.getCurrentProfile();
   if (profile?.teamId == null) return [];
 
   // Get team's machine IDs
   final machineIds = await batchRepo.getTeamMachineIds(profile!.teamId!);
 
-  // Get all activities (bounded to 7 days, 50 limits to prevent extreme UI hangs)
-  final result = await aggregator.getAllActivitiesWithCache(limit: 50, filterRecentDays: 7);
+  // Wait for activities to finish
+  final result = await activitiesFuture;
+  debugPrint('userTeamActivitiesProvider load took: ${sw.elapsedMilliseconds}ms');
 
   // Filter activities by team's machines or team membership
   return result.items.where((activity) {
@@ -146,3 +154,6 @@ final allActivitiesStreamProvider = StreamProvider<List<ActivityLogItem>>((ref) 
   final aggregator = ref.watch(activityAggregatorProvider);
   return aggregator.streamAllActivities();
 });
+
+
+

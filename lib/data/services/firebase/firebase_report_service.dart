@@ -57,30 +57,44 @@ class FirebaseReportService implements ReportService {
         '🔵 Fetching reports from ${machinesSnapshot.docs.length} machines in parallel...',
       );*/
 
-      // PARALLEL FETCHING: Fetch reports from all machines simultaneously
-      final futures = machinesSnapshot.docs.map((machineDoc) {
-        return fetchReportsForMachine(machineDoc.id, limit: limit);
-      });
+      // Extract machine IDs
+      final machineIds = machinesSnapshot.docs.map((doc) => doc.id).toList();
 
-      final results = await Future.wait(futures);
+      if (machineIds.isEmpty) return [];
 
-      // Flatten results using expand
-      final reports = results.expand((list) => list).toList();
+      // Split into chunks of 10 (Firestore whereIn limit)
+      final List<Report> allReports = [];
+      final List<Future<QuerySnapshot>> chunkFutures = [];
 
-      // Sort by createdAt descending (newest first)
-      reports.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-      // Apply limit if specified
-      if (limit != null && reports.length > limit) {
-        final limitedReports = reports.sublist(0, limit);
-        /*debugPrint(
-          '✅ Fetched ${reports.length} reports, limited to ${limitedReports.length}',
-        );*/
-        return limitedReports;
+      for (int i = 0; i < machineIds.length; i += 10) {
+        final chunk = machineIds.skip(i).take(10).toList();
+        chunkFutures.add(
+          _firestore
+              .collectionGroup('reports')
+              .where('machineId', whereIn: chunk)
+              // Note: orderBy might require a compound index, so we sort locally just to be safe if index doesn't exist
+              .get(),
+        );
       }
 
-      //debugPrint('✅ Fetched ${reports.length} reports (Parallel Strategy)');
-      return reports;
+      // Fire all 5-10 chunks concurrently instead of 42+ individual doc requests
+      final results = await Future.wait(chunkFutures);
+
+      for (var snapshot in results) {
+        allReports.addAll(
+          snapshot.docs.map((doc) => Report.fromFirestore(doc)),
+        );
+      }
+
+      // Sort globally descending
+      allReports.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+      // Apply limit
+      if (limit != null && allReports.length > limit) {
+        return allReports.sublist(0, limit);
+      }
+
+      return allReports;
     } catch (e) {
       throw Exception('Failed to fetch reports by team: $e');
     }

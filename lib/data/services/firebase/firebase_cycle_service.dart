@@ -116,22 +116,26 @@ class FirestoreCycleService implements CycleService {
     //  '🟣 Fetching cycles from ${batches.length} batches in parallel...',
     //);
 
-    final futures = batches.map((batchDoc) async {
-      final batchId = batchDoc.id;
+    const int chunkSize = 5;
+    for (int i = 0; i < batches.length; i += chunkSize) {
+      final chunk = batches.skip(i).take(chunkSize);
+      
+      final futures = chunk.map((batchDoc) async {
+        final batchId = batchDoc.id;
 
-      // ✅ Parallel sub-queries per batch
-      final results = await Future.wait([
-        getDrumControllers(batchId: batchId, cutoffDate: cutoffDate, limit: limit),
-        getAerators(batchId: batchId, cutoffDate: cutoffDate, limit: limit),
-      ]);
+        // ✅ Parallel sub-queries per batch
+        final results = await Future.wait([
+          getDrumControllers(batchId: batchId, cutoffDate: cutoffDate, limit: limit),
+          getAerators(batchId: batchId, cutoffDate: cutoffDate, limit: limit),
+        ]);
 
-      return [...results[0], ...results[1]];
-    });
+        return [...results[0], ...results[1]];
+      });
 
-    final results = await Future.wait(futures);
-
-    for (var result in results) {
-      allCycles.addAll(result);
+      final results = await Future.wait(futures);
+      for (var result in results) {
+        allCycles.addAll(result);
+      }
     }
 
     // Sort by timestamp descending (latest first)

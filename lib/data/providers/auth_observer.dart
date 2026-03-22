@@ -12,6 +12,7 @@ import 'package:flutter_application_1/ui/reports/view_model/mobile_reports_viewm
 import 'package:flutter_application_1/ui/reports/view_model/reports_notifier.dart';
 import 'package:flutter_application_1/ui/reports/view_model/reports_viewmodel.dart';
 import 'package:flutter_application_1/data/providers/activity_providers.dart';
+import 'package:flutter_application_1/data/providers/team_providers.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -37,6 +38,7 @@ void authObserver(Ref ref) {
       ref.invalidate(operatorDashboardViewModelProvider);
       ref.invalidate(teamMembersProvider);
       ref.invalidate(pendingMembersProvider);
+      ref.invalidate(currentTeamProvider);
       ref.invalidate(reportsProvider);
       ref.invalidate(reportsViewModelProvider);
       ref.invalidate(mobileReportsViewModelProvider);
