@@ -117,7 +117,7 @@ class ReportsState {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class ReportsNotifier extends _$ReportsNotifier {
   static const int _pageSize = 10;
 

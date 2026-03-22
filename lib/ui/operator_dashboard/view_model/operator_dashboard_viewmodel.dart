@@ -19,7 +19,7 @@ MachineAggregatorService operatorDashboardAggregatorService(Ref ref) {
 // ===== OPERATOR DASHBOARD VIEW MODEL =====
 @Riverpod(keepAlive: true)
 class OperatorDashboardViewModel extends _$OperatorDashboardViewModel {
-  late final MachineAggregatorService _aggregator;
+  late MachineAggregatorService _aggregator;
 
   @override
   OperatorDashboardState build() {

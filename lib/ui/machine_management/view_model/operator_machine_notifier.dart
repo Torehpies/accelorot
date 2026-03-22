@@ -164,7 +164,7 @@ class OperatorMachineState {
   int get archivedMachinesCount => machines.where((m) => m.isArchived).length;
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class OperatorMachineNotifier extends _$OperatorMachineNotifier {
   static const int _basePageSize = 10;
   static const int _loadMoreIncrement = 10;

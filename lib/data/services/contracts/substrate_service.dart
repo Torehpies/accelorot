@@ -7,7 +7,12 @@ import '../../models/substrate_preset.dart';
 abstract class SubstrateService {
   /// Fetch all substrates for the current user's team
   /// Handles authentication and team resolution internally
-  Future<List<Substrate>> fetchTeamSubstrates();
+  /// [limit] - Maximum number of substrates to fetch (null = fetch all)
+  /// [cutoffDate] - Only fetch substrates newer than this date (null = no filter)
+  Future<List<Substrate>> fetchTeamSubstrates({
+    int? limit,
+    DateTime? cutoffDate,
+  });
 
   /// Add a new substrate entry
   /// Handles authentication, batch creation/retrieval, and timestamp updates internally

@@ -51,9 +51,13 @@ class BatchRepositoryRemote implements BatchRepository {
 
   @override
   Future<List<BatchModel>> getBatchesForMachines(
-    List<String> machineIds,
-  ) async {
-    final docs = await _batchService.getBatchesForMachines(machineIds);
+    List<String> machineIds, {
+    DateTime? cutoffDate,
+  }) async {
+    final docs = await _batchService.getBatchesForMachines(
+      machineIds,
+      cutoffDate: cutoffDate,
+    );
     return docs.map((doc) => BatchModel.fromFirestore(doc)).toList();
   }
 

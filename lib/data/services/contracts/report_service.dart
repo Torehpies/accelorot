@@ -15,7 +15,8 @@ abstract class ReportService {
 
   /// Fetch reports for a specific machine
   /// @param machineId - the machine identifier
-  Future<List<Report>> fetchReportsForMachine(String machineId);
+  /// @param limit - Optional max number of reports
+  Future<List<Report>> fetchReportsForMachine(String machineId, {int? limit});
 
   /// Fetch a single report by ID
   Future<Report?> fetchReportById(String machineId, String reportId);

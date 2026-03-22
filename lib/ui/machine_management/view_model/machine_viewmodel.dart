@@ -13,16 +13,16 @@ import '../../activity_logs/models/activity_common.dart';
 
 part 'machine_viewmodel.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 MachineAggregatorService machineAggregatorService(Ref ref) {
   final repository = ref.watch(machineRepositoryProvider);
   return MachineAggregatorService(machineRepo: repository);
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class MachineViewModel extends _$MachineViewModel {
-  late final MachineAggregatorService _aggregator;
-  late final MachineFilterService _filterService;
+  late MachineAggregatorService _aggregator;
+  late MachineFilterService _filterService;
 
   String? _currentTeamId;
 

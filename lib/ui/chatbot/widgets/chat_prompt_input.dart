@@ -90,6 +90,7 @@ class _ChatPromptInputState extends ConsumerState<ChatPromptInput> {
         resolvedSessionId = await sessionNotifier.addNewSession();
         if (!context.mounted) return;
         if (resolvedSessionId == null) {
+          // ignore: use_build_context_synchronously
           AppSnackbar.error(context, 'Failed to create session');
           return;
         }

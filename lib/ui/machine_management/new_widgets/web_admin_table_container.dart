@@ -94,22 +94,22 @@ class WebAdminTableContainer extends StatelessWidget {
                   isLoading: isLoading,
                 ),
               ),
-              const SizedBox(width: 8),
-              ElevatedButton.icon(
-                onPressed: isLoading ? null : onAddMachine,
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add Machine'),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
+              // const SizedBox(width: 8),
+              // ElevatedButton.icon(
+              //   onPressed: isLoading ? null : onAddMachine,
+              //   icon: const Icon(Icons.add, size: 18),
+              //   label: const Text('Add Machine'),
+              //   style: ElevatedButton.styleFrom(
+              //     foregroundColor: Colors.white,
+              //     padding: const EdgeInsets.symmetric(
+              //       horizontal: 16,
+              //       vertical: 12,
+              //     ),
+              //     shape: RoundedRectangleBorder(
+              //       borderRadius: BorderRadius.circular(8),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),

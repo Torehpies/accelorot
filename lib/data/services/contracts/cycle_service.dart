@@ -9,16 +9,20 @@ abstract class CycleService {
 
   /// Get drum controller for a batch
   /// [cutoffDate] - Only fetch cycles newer than this date (null = no filter)
+  /// [limit] - Maximum number of cycles to fetch (null = fetch all)
   Future<List<CycleRecommendation>> getDrumControllers({
     required String batchId,
     DateTime? cutoffDate,
+    int? limit,
   });
   
   /// Get aerators for a batch
   /// [cutoffDate] - Only fetch cycles newer than this date (null = no filter)
+  /// [limit] - Maximum number of cycles to fetch (null = fetch all)
   Future<List<CycleRecommendation>> getAerators({
     required String batchId,
     DateTime? cutoffDate,
+    int? limit,
   });
   
   /// Start drum controller

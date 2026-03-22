@@ -75,7 +75,7 @@ class ActivityAggregatorService {
   // ===== FETCH & TRANSFORM METHODS =====
 
   /// Fetch and transform substrate activities
-  Future<List<ActivityLogItem>> getSubstrates() async {
+  Future<List<ActivityLogItem>> getSubstrates({int? limit, DateTime? cutoffDate}) async {
     // Check cache first
     final cached = _cache['substrates'];
     if (cached != null && !cached.isExpired(_cacheTTL)) {
@@ -86,7 +86,7 @@ class ActivityAggregatorService {
     final stopwatch = Stopwatch()..start();
     try {
       debugPrint('🔄 Fetching fresh substrates from Firebase...');
-      final substrates = await _substrateRepo.getAllSubstrates();
+      final substrates = await _substrateRepo.getAllSubstrates(limit: limit, cutoffDate: cutoffDate);
       final items = substrates
           .map(
             (substrate) => ActivityPresentationMapper.fromSubstrate(substrate),
@@ -112,8 +112,8 @@ class ActivityAggregatorService {
   }
 
   /// Fetch raw substrate entities (for progressive loading)
-  Future<List<dynamic>> getSubstratesRaw() async {
-    return await _substrateRepo.getAllSubstrates();
+  Future<List<dynamic>> getSubstratesRaw({DateTime? cutoffDate, int? limit}) async {
+    return await _substrateRepo.getAllSubstrates(limit: limit, cutoffDate: cutoffDate);
   }
 
   /// Fetch and transform alert activities
@@ -157,7 +157,7 @@ class ActivityAggregatorService {
   }
 
   /// Fetch and transform report activities
-  Future<List<ActivityLogItem>> getReports() async {
+  Future<List<ActivityLogItem>> getReports({int? limit}) async {
     // Check cache first
     final cached = _cache['reports'];
     if (cached != null && !cached.isExpired(_cacheTTL)) {
@@ -168,7 +168,7 @@ class ActivityAggregatorService {
     final stopwatch = Stopwatch()..start();
     try {
       debugPrint('🔄 Fetching fresh reports from Firebase...');
-      final reports = await _reportRepo.getTeamReports();
+      final reports = await _reportRepo.getTeamReports(limit: limit);
       final items = reports
           .map((report) => ActivityPresentationMapper.fromReport(report))
           .toList();
@@ -258,7 +258,7 @@ class ActivityAggregatorService {
         : null;
 
     final results = await Future.wait([
-      _substrateRepo.getAllSubstrates(),
+      _substrateRepo.getAllSubstrates(cutoffDate: cutoffDate),
       _alertRepo.getTeamAlerts(cutoffDate: cutoffDate), // No limit for counts
       _cycleRepo.getTeamCycles(cutoffDate: cutoffDate), // No limit for counts
       _reportRepo.getTeamReports(), // No limit for counts
@@ -315,8 +315,10 @@ class ActivityAggregatorService {
       final parallelStopwatch = Stopwatch()..start();
 
       final results = await Future.wait([
-        _substrateRepo
-            .getAllSubstrates(), // Substrates: fetch all (usually small dataset)
+        _substrateRepo.getAllSubstrates(
+          limit: limit,
+          cutoffDate: cutoffDate,
+        ), // Substrates: paginated + 2-day filter
         _alertRepo.getTeamAlerts(
           limit: limit,
           cutoffDate: cutoffDate,
@@ -455,7 +457,7 @@ class ActivityAggregatorService {
   // ===== STREAMING METHODS =====
 
   /// Stream all activities with real-time updates
-  Stream<List<ActivityLogItem>> streamAllActivities() async* {
+  Stream<List<ActivityLogItem>> streamAllActivities({int limit = 50}) async* {
     debugPrint('🔴 Setting up streamAllActivities...');
     
     final cutoffDate = DateTime.now().subtract(Duration(days: defaultCutoffDays));
@@ -465,41 +467,50 @@ class ActivityAggregatorService {
     final cyclesStream = _cycleRepo.streamTeamCycles(cutoffDate: cutoffDate);
     
     // Get initial substrates (they don't have streaming support yet)
-    final substrates = await _substrateRepo.getAllSubstrates();
+    final substrates = await _substrateRepo.getAllSubstrates(limit: limit, cutoffDate: cutoffDate);
     final substrateItems = substrates
         .map((s) => ActivityPresentationMapper.fromSubstrate(s))
         .toList();
 
-    // Combine alerts and cycles streams
-    await for (final alertsAndCycles in Rx.combineLatest2(
+    DateTime? lastReportsFetch;
+    List<dynamic> cachedReports = [];
+
+    // Combine alerts and cycles streams, and debounce updates
+    final combinedStream = Rx.combineLatest2(
       alertsStream,
       cyclesStream,
       (List<Alert> alerts, List<CycleRecommendation> cycles) {
         return {'alerts': alerts, 'cycles': cycles};
       },
-    )) {
+    ).debounceTime(const Duration(milliseconds: 500));
+
+    await for (final alertsAndCycles in combinedStream) {
       try {
         final alerts = alertsAndCycles['alerts'] as List<Alert>;
         final cycles = alertsAndCycles['cycles'] as List<CycleRecommendation>;
         
-        // Get reports (using one-time fetch for now)
-        final reports = await getReportsRaw();
+        // Fetch reports with a TTL (e.g., 60 seconds)
+        final now = DateTime.now();
+        if (lastReportsFetch == null || now.difference(lastReportsFetch) > const Duration(seconds: 60)) {
+           cachedReports = await getReportsRaw(limit: limit);
+           lastReportsFetch = now;
+        }
 
         // Transform all to ActivityLogItems
         final allActivities = <ActivityLogItem>[
           ...substrateItems,
           ...alerts.map((a) => ActivityPresentationMapper.fromAlert(a)),
           ...cycles.map((c) => ActivityPresentationMapper.fromCycleRecommendation(c)),
-          ...reports.map((r) => ActivityPresentationMapper.fromReport(r)),
+          ...cachedReports.map((r) => ActivityPresentationMapper.fromReport(r)),
         ];
 
         // Sort by timestamp (newest first)
         allActivities.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
-        //debugPrint('🔔 Stream updated: ${allActivities.length} total activities');
+        // Limit the list we emit
+        final emittedList = allActivities.take(limit).toList();
 
-        // Yield the combined list
-        yield allActivities;
+        yield emittedList;
       } catch (e) {
         debugPrint('❌ Error in streamAllActivities: $e');
         yield [];

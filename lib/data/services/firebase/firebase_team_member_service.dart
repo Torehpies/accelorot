@@ -16,6 +16,8 @@ class FirebaseTeamMemberService extends TeamMemberService {
     return _firestore.collection('teams').doc(teamId).collection('members');
   }
 
+  // ===== FETCH PAGE (kept for TeamDetailNotifier backwards compat) =====
+
   @override
   Future<List<TeamMember>> fetchTeamMembersPage({
     required String teamId,
@@ -24,17 +26,17 @@ class FirebaseTeamMemberService extends TeamMemberService {
     DateFilterRange? dateFilter,
   }) async {
     try {
-      Query<Map<String, dynamic>> query = _membersRef(
-        teamId,
-      ).orderBy('addedAt', descending: true).limit(pageSize * (pageIndex + 1));
+      Query<Map<String, dynamic>> query = _membersRef(teamId)
+          .orderBy('addedAt', descending: true)
+          .limit(pageSize * (pageIndex + 1));
 
       if (dateFilter?.isActive == true) {
         query = query
             .where('addedAt', isGreaterThanOrEqualTo: dateFilter!.startDate)
             .where('addedAt', isLessThanOrEqualTo: dateFilter.endDate);
       }
-      final snapshot = await query.get();
 
+      final snapshot = await query.get();
       final docs = snapshot.docs.skip(pageSize * pageIndex).take(pageSize);
 
       return docs
@@ -42,8 +44,60 @@ class FirebaseTeamMemberService extends TeamMemberService {
           .toList();
     } catch (e) {
       debugPrint(e.toString());
+      return [];
     }
-    return [];
+  }
+
+  // ===== FETCH ALL (used by TeamMembersNotifier for client-side pagination) =====
+
+  @override
+  Future<List<TeamMember>> fetchAllTeamMembers({
+    required String teamId,
+    DateFilterRange? dateFilter,
+  }) async {
+    try {
+      Query<Map<String, dynamic>> query = _membersRef(teamId)
+          .orderBy('addedAt', descending: true);
+
+      if (dateFilter?.isActive == true) {
+        query = query
+            .where('addedAt', isGreaterThanOrEqualTo: dateFilter!.startDate)
+            .where('addedAt', isLessThanOrEqualTo: dateFilter.endDate);
+      }
+
+      final snapshot = await query.get();
+
+      return snapshot.docs
+          .map((doc) => TeamMember.fromJson({...doc.data(), 'id': doc.id}))
+          .toList();
+    } catch (e) {
+      debugPrint(e.toString());
+      return [];
+    }
+  }
+
+  // ===== UPDATE =====
+
+  @override
+  Future<Map<String, int>> fetchMemberCountsByStatus(String teamId) async {
+    try {
+      final snapshot = await _membersRef(teamId).get();
+      final counts = <String, int>{
+        'active': 0,
+        'archived': 0,
+        'removed': 0,
+        'pending': 0,
+        'approval': 0,
+      };
+      for (final doc in snapshot.docs) {
+        final status = (doc.data()['status'] as String? ?? 'active').toLowerCase();
+        counts[status] = (counts[status] ?? 0) + 1;
+      }
+      return counts;
+    } catch (e) {
+      debugPrint('fetchMemberCountsByStatus error: $e');
+      return {};
+    }
   }
 
   @override

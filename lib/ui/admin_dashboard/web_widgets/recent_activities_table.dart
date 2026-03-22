@@ -1,25 +1,61 @@
 // lib/ui/web_admin_home/widgets/recent_activities_table.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../data/providers/activity_providers.dart';
 import '../../../data/providers/batch_providers.dart';
 import '../../../data/models/activity_log_item.dart';
+import 'package:flutter_application_1/ui/core/skeleton/recent_activities_table_skeleton.dart';
 
-class RecentActivitiesTable extends ConsumerWidget {
+class RecentActivitiesTable extends ConsumerStatefulWidget {
   final String? machineId;
   final bool hideHeader;
   final bool isCondensed;
+  final Animation<double>? pulse;
 
   const RecentActivitiesTable({
     super.key,
     this.machineId,
     this.hideHeader = false,
     this.isCondensed = false,
+    this.pulse,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Use streaming provider for real-time updates 
+  ConsumerState<RecentActivitiesTable> createState() =>
+      _RecentActivitiesTableState();
+}
+
+class _RecentActivitiesTableState extends ConsumerState<RecentActivitiesTable>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _fallbackController;
+  late final Animation<double> _fallbackPulse;
+
+  // Use shared pulse if provided, otherwise fall back to own controller
+  Animation<double> get _pulse => widget.pulse ?? _fallbackPulse;
+
+  @override
+  void initState() {
+    super.initState();
+    _fallbackController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat(reverse: true);
+
+    _fallbackPulse = CurvedAnimation(
+      parent: _fallbackController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _fallbackController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final activitiesAsync = ref.watch(allActivitiesStreamProvider);
     final batchesAsync = ref.watch(userTeamBatchesProvider);
     final batches = batchesAsync.value ?? [];
@@ -42,19 +78,23 @@ class RecentActivitiesTable extends ConsumerWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeaderTitleRow(ref),
+              // ── Always visible: title + refresh
+              _buildHeaderTitleRow(),
               const SizedBox(height: 20),
-              if (!hideHeader) ...[
+
+              // ── Always visible: column headers
+              if (!widget.hideHeader) ...[
                 _buildHeader(),
                 const Divider(height: 1, color: Color(0xFFE5E7EB)),
                 const SizedBox(height: 8),
               ],
+
+              // ── Data-dependent: skeleton or content
               Expanded(
                 child: activitiesAsync.when(
                   data: (activities) => _buildContent(activities, batches),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (_, stack) => const Center(
+                  loading: () => RecentActivitiesTableSkeleton(pulse: _pulse, isCondensed: widget.isCondensed),
+                  error: (_, _) => const Center(
                     child: Text(
                       'Failed to load activities',
                       style: TextStyle(color: Color(0xFF9CA3AF)),
@@ -69,16 +109,14 @@ class RecentActivitiesTable extends ConsumerWidget {
     );
   }
 
-  Widget _buildContent(
-    List<ActivityLogItem> activities,
-    List<dynamic> batches, {
-    bool shrinkWrap = false,
-  }) {
-    final filteredActivities = machineId != null
-        ? activities.where((a) => a.machineId == machineId).toList()
+  // ── Content
+
+  Widget _buildContent(List<ActivityLogItem> activities, List<dynamic> batches) {
+    final filtered = widget.machineId != null
+        ? activities.where((a) => a.machineId == widget.machineId).toList()
         : activities;
 
-    if (filteredActivities.isEmpty) {
+    if (filtered.isEmpty) {
       return const Center(
         child: Text(
           'No activities yet',
@@ -87,19 +125,46 @@ class RecentActivitiesTable extends ConsumerWidget {
       );
     }
 
+    // ✅ NEW: Constant time lookup map to reduce N+1 performance bottleneck
+    final Map<String, String> batchNameLookup = {};
+    for (var b in batches) {
+      if (b.id != null) {
+        batchNameLookup[b.id] = b.displayName ?? b.id;
+      }
+    }
+
     return ListView.separated(
-      itemCount: filteredActivities.length,
+      itemCount: filtered.length,
       padding: EdgeInsets.zero,
-      shrinkWrap: shrinkWrap,
-      physics: shrinkWrap
-          ? const NeverScrollableScrollPhysics()
-          : const ClampingScrollPhysics(),
-      itemBuilder: (context, index) {
-        final activity = filteredActivities[index];
-        return _buildRow(activity, batches);
-      },
-      separatorBuilder: (context, index) =>
+      physics: const ClampingScrollPhysics(),
+      separatorBuilder: (_, _) =>
           const Divider(height: 1, color: Color(0xFFE5E7EB)),
+      itemBuilder: (_, index) => _buildRow(filtered[index], batchNameLookup),
+    );
+  }
+
+  // ── Static header widgets
+
+  Widget _buildHeaderTitleRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Recent Activities',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF374151),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.refresh, size: 16),
+          onPressed: () => ref.invalidate(allActivitiesStreamProvider),
+          tooltip: 'Refresh',
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+        ),
+      ],
     );
   }
 
@@ -109,7 +174,7 @@ class RecentActivitiesTable extends ConsumerWidget {
       child: Row(
         children: [
           Expanded(
-            flex: isCondensed ? 4 : 3,
+            flex: widget.isCondensed ? 4 : 3,
             child: const Text(
               'Description',
               style: TextStyle(
@@ -119,7 +184,7 @@ class RecentActivitiesTable extends ConsumerWidget {
               ),
             ),
           ),
-          if (!isCondensed) ...[
+          if (!widget.isCondensed) ...[
             const Expanded(
               flex: 2,
               child: Text(
@@ -143,10 +208,11 @@ class RecentActivitiesTable extends ConsumerWidget {
               ),
             ),
           ],
-          Expanded(
+          const Expanded(
             flex: 1,
-            child: const Text(
+            child: Text(
               'Date',
+              textAlign: TextAlign.end,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
@@ -159,41 +225,17 @@ class RecentActivitiesTable extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeaderTitleRow(WidgetRef ref) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const Text(
-          'Recent Activities',
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF374151),
-          ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.refresh, size: 16),
-          // ✅ Invalidate streaming provider to force refresh
-          onPressed: () => ref.invalidate(allActivitiesStreamProvider),
-          tooltip: 'Refresh',
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-        ),
-      ],
-    );
-  }
+  // ── Row
 
-  Widget _buildRow(ActivityLogItem activity, List<dynamic> batches) {
+  Widget _buildRow(ActivityLogItem activity, Map<String, String> batchNameLookup) {
     final iconColor = activity.statusColor;
     final icon = activity.icon;
 
-    // Lookup batch display name
+    // Constant-time batch name lookup via pre-built map
     String? batchDisplayName = activity.batchName ?? activity.batchId;
     if (activity.batchName == null && activity.batchId != null) {
-      final matchingBatches = batches.where((b) => b.id == activity.batchId);
-      if (matchingBatches.isNotEmpty) {
-        batchDisplayName = matchingBatches.first.displayName;
-      }
+      final name = batchNameLookup[activity.batchId];
+      if (name != null) batchDisplayName = name;
     }
 
     final machineText = activity.machineName ?? activity.machineId ?? '';
@@ -204,7 +246,7 @@ class RecentActivitiesTable extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
-            flex: isCondensed ? 4 : 3,
+            flex: widget.isCondensed ? 4 : 3,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -222,7 +264,6 @@ class RecentActivitiesTable extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title
                       Text(
                         activity.title,
                         style: const TextStyle(
@@ -234,10 +275,8 @@ class RecentActivitiesTable extends ConsumerWidget {
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
-                      // Operator name
                       Text(
-                        activity.operatorName != null &&
-                                activity.operatorName!.isNotEmpty
+                        activity.operatorName?.isNotEmpty == true
                             ? activity.operatorName!
                             : 'System',
                         style: const TextStyle(
@@ -251,13 +290,12 @@ class RecentActivitiesTable extends ConsumerWidget {
               ],
             ),
           ),
-          if (!isCondensed) ...[
+          if (!widget.isCondensed) ...[
             Expanded(
               flex: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Machine name
                   Text(
                     machineText.isNotEmpty ? machineText : '—',
                     style: const TextStyle(
@@ -268,10 +306,8 @@ class RecentActivitiesTable extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (batchDisplayName != null &&
-                      batchDisplayName.isNotEmpty) ...[
+                  if (batchDisplayName != null && batchDisplayName.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    // Batch name
                     Text(
                       batchDisplayName,
                       style: const TextStyle(

@@ -166,20 +166,18 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
         return const AdminHomeState();
       }
 
-      final operators = await ref
-          .read(operatorRepositoryProvider)
-          .getOperators(teamId);
-      final machines = await ref
-          .read(machineRepositoryProvider)
-          .getMachinesByTeam(teamId);
-      final reports = await ref
-          .read(reportRepositoryProvider)
-          .getReportsByTeam(teamId);
+      // Load collections concurrently instead of sequentially to drastically reduce dashboard load time
+      final sw = Stopwatch()..start();
+      final results = await Future.wait([
+        ref.read(operatorRepositoryProvider).getOperators(teamId),
+        ref.read(machineRepositoryProvider).getMachinesByTeam(teamId),
+        ref.read(reportRepositoryProvider).getReportsByTeam(teamId),
+      ]);
 
       return AdminHomeState(
-        operators: operators,
-        machines: machines,
-        reports: reports,
+        operators: results[0] as List<OperatorModel>,
+        machines: results[1] as List<MachineModel>,
+        reports: results[2] as List<Report>,
       );
     } catch (e) {
       rethrow;
@@ -208,21 +206,19 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
         return;
       }
 
-      final operators = await ref
-          .read(operatorRepositoryProvider)
-          .getOperators(teamId);
-      final machines = await ref
-          .read(machineRepositoryProvider)
-          .getMachinesByTeam(teamId);
-      final reports = await ref
-          .read(reportRepositoryProvider)
-          .getReportsByTeam(teamId);
+      // Load collections concurrently here too
+      final sw = Stopwatch()..start();
+      final results = await Future.wait([
+        ref.read(operatorRepositoryProvider).getOperators(teamId),
+        ref.read(machineRepositoryProvider).getMachinesByTeam(teamId),
+        ref.read(reportRepositoryProvider).getReportsByTeam(teamId),
+      ]);
 
       state = AsyncValue.data(
         AdminHomeState(
-          operators: operators,
-          machines: machines,
-          reports: reports,
+          operators: results[0] as List<OperatorModel>,
+          machines: results[1] as List<MachineModel>,
+          reports: results[2] as List<Report>,
         ),
       );
     } catch (e) {
@@ -232,3 +228,4 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
 
   void refresh() => loadData();
 }
+

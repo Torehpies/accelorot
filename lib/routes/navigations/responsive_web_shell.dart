@@ -1,5 +1,8 @@
+// lib/ui/core/widgets/responsive_web_shell.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/routes/navigation_utils.dart';
+import 'package:flutter_application_1/routes/web_navigation_utils.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class ResponsiveWebShell extends StatelessWidget {
@@ -121,14 +124,15 @@ class ResponsiveWebShell extends StatelessWidget {
                         },
                       ),
                     ),
+
+                    // ── Logout button
                     isTablet
                         ? Container(
                             margin: const EdgeInsets.symmetric(vertical: 20),
                             child: ElevatedButton(
-                              onPressed: () => handleLogout(
+                              onPressed: () => handleWebLogout(
                                 context,
                                 roleName: roleName,
-                                confirmColor: AppColors.error,
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.background,
@@ -166,11 +170,9 @@ class ResponsiveWebShell extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              // Use centralized handler
-                              onPressed: () => handleLogout(
+                              onPressed: () => handleWebLogout(
                                 context,
                                 roleName: roleName,
-                                confirmColor: AppColors.error,
                               ),
                             ),
                           ),

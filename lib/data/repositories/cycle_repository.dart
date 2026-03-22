@@ -14,10 +14,15 @@ class CycleRepository {
 
   Future<List<CycleRecommendation>> getDrumControllers({
     required String batchId,
-  }) => _cycleService.getDrumControllers(batchId: batchId);
+    DateTime? cutoffDate,
+    int? limit,
+  }) => _cycleService.getDrumControllers(batchId: batchId, cutoffDate: cutoffDate, limit: limit);
 
-  Future<List<CycleRecommendation>> getAerators({required String batchId}) =>
-      _cycleService.getAerators(batchId: batchId);
+  Future<List<CycleRecommendation>> getAerators({
+    required String batchId,
+    DateTime? cutoffDate,
+    int? limit,
+  }) => _cycleService.getAerators(batchId: batchId, cutoffDate: cutoffDate, limit: limit);
   Future<String> startDrumController({
     required String batchId,
     required String machineId,
