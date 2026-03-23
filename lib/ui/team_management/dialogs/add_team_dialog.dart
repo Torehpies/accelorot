@@ -10,8 +10,14 @@ import 'package:flutter_application_1/ui/core/widgets/dialog/dialog_fields.dart'
 import 'package:flutter_application_1/ui/core/widgets/dialog/web_confirmation_dialog.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/add_team_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
+import 'package:flutter_application_1/ui/team_management/view_model/psgc_state.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
+
+// Import PSGC models
+import 'package:flutter_application_1/data/models/psgc/psgc_region.dart';
+import 'package:flutter_application_1/data/models/psgc/psgc_province.dart';
+import 'package:flutter_application_1/data/models/psgc/psgc_city_municipality.dart';
+import 'package:flutter_application_1/data/models/psgc/psgc_barangay.dart';
 
 class AddTeamDialog extends ConsumerStatefulWidget {
   const AddTeamDialog({super.key});
@@ -25,51 +31,40 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
   final _teamNameController = TextEditingController();
   final _houseNumberController = TextEditingController();
   final _streetController = TextEditingController();
-  final _barangayController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _regionController = TextEditingController();
 
   // ── Per-field error state
   String? _teamNameError;
   String? _houseNumberError;
   String? _streetError;
-  String? _barangayError;
-  String? _cityError;
   String? _regionError;
+  String? _provinceError;
+  String? _cityError;
+  String? _barangayError;
+
+  @override
+  void initState() {
+    super.initState();
+    // Load regions when dialog opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(psgcProvider.notifier).loadRegions();
+    });
+  }
 
   // ── Derived helpers
-  bool get _isDirty =>
-      _teamNameController.text.isNotEmpty ||
+  bool get _isDirty {
+     final psgcState = ref.read(psgcProvider);
+     return _teamNameController.text.isNotEmpty ||
       _houseNumberController.text.isNotEmpty ||
       _streetController.text.isNotEmpty ||
-      _barangayController.text.isNotEmpty ||
-      _cityController.text.isNotEmpty ||
-      _regionController.text.isNotEmpty;
+      psgcState.selectedRegion != null;
+  }
 
-  bool get _hasValidInput =>
-      _teamNameController.text.isNotEmpty &&
-      _houseNumberController.text.isNotEmpty &&
-      _streetController.text.isNotEmpty &&
-      _barangayController.text.isNotEmpty &&
-      _cityController.text.isNotEmpty &&
-      _regionController.text.isNotEmpty;
-
-  bool get _hasAnyError =>
-      _teamNameError != null ||
-      _houseNumberError != null ||
-      _streetError != null ||
-      _barangayError != null ||
-      _cityError != null ||
-      _regionError != null;
-
-  // ── Submit-time validation — preserves all original validator rules
   bool _validate() {
     final teamName = _teamNameController.text.trim();
     final houseNumber = _houseNumberController.text.trim();
     final street = _streetController.text.trim();
-    final barangay = _barangayController.text.trim();
-    final city = _cityController.text.trim();
-    final region = _regionController.text.trim();
+    
+    final psgcState = ref.read(psgcProvider);
 
     setState(() {
       _teamNameError = teamName.isEmpty
@@ -90,32 +85,52 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
               ? 'This field must be at least 4 characters'
               : null;
 
-      _barangayError = barangay.isEmpty
-          ? 'This field is required'
-          : barangay.length > 5
-              ? 'This field has a maximum of 5 characters'
+      _regionError = psgcState.selectedRegion == null ? 'Region is required' : null;
+      
+      // Province is required only if the region has provinces
+      if (psgcState.regions.isNotEmpty && psgcState.selectedRegion != null) {
+          _provinceError = (psgcState.provinces.isNotEmpty && psgcState.selectedProvince == null) 
+              ? 'Province is required' 
               : null;
+      } else {
+        _provinceError = null;
+      }
 
-      _cityError = city.isEmpty
-          ? 'This field is required'
-          : city.length < 4
-              ? 'This field must be at least 4 characters'
-              : null;
-
-      _regionError = region.isEmpty
-          ? 'This field is required'
-          : region.length < 3
-              ? 'This field must be at least 3 characters'
-              : null;
+      _cityError = psgcState.selectedCityMunicipality == null ? 'City/Municipality is required' : null;
+      _barangayError = psgcState.selectedBarangay == null ? 'Barangay is required' : null;
     });
 
     return _teamNameError == null &&
         _houseNumberError == null &&
         _streetError == null &&
-        _barangayError == null &&
+        _regionError == null &&
+        _provinceError == null &&
         _cityError == null &&
-        _regionError == null;
+        _barangayError == null;
   }
+
+  bool get _hasValidInput {
+      final psgcState = ref.read(psgcProvider);
+      final hasProvinceIfRequired = psgcState.provinces.isEmpty || psgcState.selectedProvince != null;
+
+      return _teamNameController.text.isNotEmpty &&
+             _houseNumberController.text.isNotEmpty &&
+             _streetController.text.isNotEmpty &&
+             psgcState.selectedRegion != null &&
+             hasProvinceIfRequired &&
+             psgcState.selectedCityMunicipality != null &&
+             psgcState.selectedBarangay != null;
+  }
+  
+  bool get _hasAnyError =>
+      _teamNameError != null ||
+      _houseNumberError != null ||
+      _streetError != null ||
+      _regionError != null ||
+      _provinceError != null ||
+      _cityError != null ||
+      _barangayError != null;
+
 
   // ── Cancel handler
   Future<void> _handleCancel() async {
@@ -128,9 +143,10 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
         cancelLabel: 'Keep Editing',
         confirmIsDestructive: true,
       );
-      if (result == ConfirmResult.confirmed && context.mounted) {
-        // ignore: use_build_context_synchronously
-        Navigator.of(context).pop();
+      if (result == ConfirmResult.confirmed) {
+        if (context.mounted) {
+          Navigator.of(context).pop();
+        }
       }
     } else {
       Navigator.of(context).pop();
@@ -156,22 +172,30 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
     _addTeam();
   }
 
-  // ── Business logic — unchanged from original
+  // ── Business logic
   void _addTeam() {
     final teamName = _teamNameController.text.trim();
     final houseNumber = _houseNumberController.text.trim();
     final street = _streetController.text.trim();
-    final barangay = 'BRGY. ${_barangayController.text.trim()}';
-    final city = _cityController.text.trim();
-    final region = _regionController.text.trim();
+    
+    final psgcState = ref.read(psgcProvider);
+    
+    final region = psgcState.selectedRegion?.name ?? '';
+    final province = psgcState.selectedProvince?.name ?? ''; // Optional
+    final city = psgcState.selectedCityMunicipality?.name ?? '';
+    final barangay = 'BRGY. ${psgcState.selectedBarangay?.name ?? ''}';
 
-    final address = [
+    // Construct full address
+    final addressParts = [
       houseNumber,
       street,
       barangay,
       city,
+      if (province.isNotEmpty) province,
       region,
-    ].where((s) => s.isNotEmpty).join(', ');
+    ];
+    
+    final address = addressParts.where((s) => s.isNotEmpty).join(', ');
 
     final appUserId = ref.read(authUserProvider).value!.uid;
 
@@ -197,16 +221,15 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
     _teamNameController.dispose();
     _houseNumberController.dispose();
     _streetController.dispose();
-    _barangayController.dispose();
-    _cityController.dispose();
-    _regionController.dispose();
     super.dispose();
   }
 
   // ── Build
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(addTeamProvider);
+    final addTeamState = ref.watch(addTeamProvider);
+    final psgcState = ref.watch(psgcProvider);
+    final psgcNotifier = ref.read(psgcProvider.notifier);
 
     ref.listen<AsyncValue<void>>(addTeamProvider, (_, next) {
       if (next is AsyncData) {
@@ -224,7 +247,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
     return BaseDialog(
       title: 'Add Team',
       subtitle: 'Create a new team.',
-      canClose: !state.isLoading,
+      canClose: !addTeamState.isLoading,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -234,7 +257,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
             controller: _teamNameController,
             hintText: 'Team',
             errorText: _teamNameError,
-            enabled: !state.isLoading,
+            enabled: !addTeamState.isLoading,
             required: true,
             keyboardType: TextInputType.text,
             onChanged: (_) => setState(() => _teamNameError = null),
@@ -247,7 +270,7 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
             controller: _houseNumberController,
             hintText: '1111 / Lot 10 Blk 10',
             errorText: _houseNumberError,
-            enabled: !state.isLoading,
+            enabled: !addTeamState.isLoading,
             required: true,
             keyboardType: TextInputType.streetAddress,
             onChanged: (_) => setState(() => _houseNumberError = null),
@@ -260,94 +283,94 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
             controller: _streetController,
             hintText: 'Libra St. / Zabarte Road / Luisa Subd.',
             errorText: _streetError,
-            enabled: !state.isLoading,
+            enabled: !addTeamState.isLoading,
             required: true,
             keyboardType: TextInputType.streetAddress,
             onChanged: (_) => setState(() => _streetError = null),
           ),
           const SizedBox(height: 16),
-
-          // ── Barangay — raw TextFormField to support prefixText
-          TextFormField(
-            controller: _barangayController,
-            enabled: !state.isLoading,
-            keyboardType: TextInputType.text,
-            style: const TextStyle(fontSize: 14, color: WebColors.textPrimary),
-            onChanged: (_) => setState(() => _barangayError = null),
-            decoration: InputDecoration(
-              label: RichText(
-                text: const TextSpan(
-                  text: 'Barangay',
-                  style: TextStyle(fontSize: 14, color: WebColors.textLabel),
-                  children: [
-                    TextSpan(
-                      text: ' *',
-                      style: TextStyle(color: WebColors.error),
-                    ),
-                  ],
-                ),
-              ),
-              prefixText: 'BRGY. ',
-              prefixStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: WebColors.textSecondary,
-              ),
-              hintText: '178 / 176-E',
-              hintStyle: TextStyle(color: WebColors.textMuted),
-              errorText: _barangayError,
-              filled: false,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: WebColors.cardBorder),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: WebColors.tableBorder),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: WebColors.greens, width: 2),
-              ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: WebColors.error),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: WebColors.error, width: 2),
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // ── City
-          InputField(
-            label: 'City',
-            controller: _cityController,
-            hintText: 'Caloocan City',
-            errorText: _cityError,
-            enabled: !state.isLoading,
-            required: true,
-            keyboardType: TextInputType.text,
-            onChanged: (_) => setState(() => _cityError = null),
-          ),
-          const SizedBox(height: 16),
-
+          
+          if (psgcState.isLoading && psgcState.regions.isEmpty)
+             const Padding(
+               padding: EdgeInsets.all(8.0),
+               child: Center(child: LinearProgressIndicator()),
+             ),
+             
           // ── Region
-          InputField(
+          WebDropdownField<PsgcRegion>(
             label: 'Region',
-            controller: _regionController,
-            hintText: 'Region 1 / NCR',
+            value: psgcState.selectedRegion,
+            items: psgcState.regions.map((r) => DropdownItem(value: r, label: r.name)).toList(),
+            hintText: 'Select Region',
             errorText: _regionError,
-            enabled: !state.isLoading,
+            enabled: !addTeamState.isLoading && !psgcState.isLoading,
             required: true,
-            keyboardType: TextInputType.text,
-            onChanged: (_) => setState(() => _regionError = null),
+            onChanged: (region) {
+               setState(() {
+                 _regionError = null;
+                 _provinceError = null;
+                 _cityError = null;
+                 _barangayError = null;
+               });
+               psgcNotifier.selectRegion(region);
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // ── Province (Only if available)
+          if (psgcState.provinces.isNotEmpty) ...[
+            WebDropdownField<PsgcProvince>(
+              label: 'Province',
+              value: psgcState.selectedProvince,
+              items: psgcState.provinces.map((p) => DropdownItem(value: p, label: p.name)).toList(),
+              hintText: 'Select Province',
+              errorText: _provinceError,
+              enabled: !addTeamState.isLoading && !psgcState.isLoading,
+              required: true,
+              onChanged: (province) {
+                setState(() {
+                  _provinceError = null;
+                  _cityError = null;
+                  _barangayError = null;
+                });
+                psgcNotifier.selectProvince(province);
+              },
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // ── City / Municipality
+          WebDropdownField<PsgcCityMunicipality>(
+            label: 'City / Municipality',
+            value: psgcState.selectedCityMunicipality,
+            items: psgcState.citiesMunicipalities.map((c) => DropdownItem(value: c, label: c.name)).toList(),
+            hintText: 'Select City/Municipality',
+            errorText: _cityError,
+            enabled: !addTeamState.isLoading && !psgcState.isLoading && (psgcState.selectedRegion != null),
+            required: true,
+            onChanged: (city) {
+              setState(() {
+                _cityError = null;
+                _barangayError = null;
+              });
+              psgcNotifier.selectCityMunicipality(city);
+            },
+          ),
+          const SizedBox(height: 16),
+
+          // ── Barangay
+          WebDropdownField<PsgcBarangay>(
+            label: 'Barangay',
+            value: psgcState.selectedBarangay,
+            items: psgcState.barangays.map((b) => DropdownItem(value: b, label: b.name)).toList(),
+            hintText: 'Select Barangay',
+            errorText: _barangayError,
+            enabled: !addTeamState.isLoading && !psgcState.isLoading && (psgcState.selectedCityMunicipality != null),
+            required: true,
+            onChanged: (barangay) {
+              setState(() => _barangayError = null);
+              psgcNotifier.selectBarangay(barangay);
+            },
           ),
         ],
       ),
@@ -355,17 +378,17 @@ class _AddTeamDialogState extends ConsumerState<AddTeamDialog> {
         // ── Cancel
         DialogAction.secondary(
           label: 'Cancel',
-          onPressed: state.isLoading ? null : _handleCancel,
+          onPressed: addTeamState.isLoading ? null : _handleCancel,
         ),
 
         // ── Submit
         DialogAction.primary(
           label: 'Add Team',
           onPressed: _handleSubmit,
-          isLoading: state.isLoading,
+          isLoading: addTeamState.isLoading,
           isDisabled: !_hasValidInput || _hasAnyError,
         ),
       ],
     );
   }
-}
+}	
