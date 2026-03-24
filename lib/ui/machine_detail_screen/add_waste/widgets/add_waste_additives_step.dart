@@ -58,7 +58,9 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
   @override
   void initState() {
     super.initState();
+
     _selected = Set.from(widget.selectedAdditives);
+
     if (_selected.isNotEmpty) {
       _hasAdditives = true;
     }
@@ -77,6 +79,7 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
       } else {
         _selected.add(label);
       }
+      
       widget.onAdditivesChanged(_selected);
     });
   }

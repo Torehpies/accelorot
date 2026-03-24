@@ -60,25 +60,32 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
       
       if (!mounted) return;
 
-      if (cycle != null && widget.machine.aeratorActive) {
-        // It's actively running
+      if (widget.machine.aeratorActive) {
+        // It's actively running (database status)
         setState(() {
           _isRunning = true;
-          _startTime = cycle.startedAt ?? DateTime.now();
-          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+          if (cycle != null && cycle.action == 'started') {
+            _startTime = cycle.startedAt ?? _startTime ?? DateTime.now();
+            _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+          } else {
+            _startTime ??= DateTime.now();
+            _accumulatedSeconds = 0;
+          }
           
           final elapsed = DateTime.now().difference(_startTime!).inSeconds;
           _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds + elapsed));
         });
         _startTimer();
-      } else if (cycle != null && !widget.machine.aeratorActive && widget.machine.aeratorPaused) {
+      } else if (!widget.machine.aeratorActive && widget.machine.aeratorPaused) {
         // It's paused
         _timer?.cancel();
         setState(() {
           _isRunning = false;
           _startTime = null;
-          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
-          _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
+          if (cycle != null) {
+            _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+            _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
+          }
         });
       } else {
         // Idle/Stopped
@@ -172,7 +179,6 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
         }
 
       } else {
-        // Start the aerator
         await cycleRepo.startAerator(
           batchId: batchId,
           machineId: widget.machine.machineId,
@@ -180,12 +186,6 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
           cycles: 1, 
           duration: 'Continuous', 
         );
-
-        setState(() {
-          _isRunning = true;
-          _startTime = DateTime.now();
-        });
-        _startTimer();
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

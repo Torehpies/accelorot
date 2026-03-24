@@ -60,26 +60,33 @@ class _DrumControlState extends ConsumerState<DrumControl> {
       
       if (!mounted) return;
 
-      if (cycle != null && widget.machine.drumActive) {
-        // It's actively running
+      if (widget.machine.drumActive) {
+        // It's actively running (database status)
         setState(() {
           _isRunning = true;
-          _startTime = cycle.startedAt ?? DateTime.now();
-          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+          if (cycle != null && cycle.action == 'started') {
+            _startTime = cycle.startedAt ?? _startTime ?? DateTime.now();
+            _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+          } else {
+            _startTime ??= DateTime.now();
+            _accumulatedSeconds = 0;
+          }
           
           // Calculate immediate uptime
           final elapsed = DateTime.now().difference(_startTime!).inSeconds;
           _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds + elapsed));
         });
         _startTimer();
-      } else if (cycle != null && !widget.machine.drumActive && widget.machine.drumPaused) {
+      } else if (!widget.machine.drumActive && widget.machine.drumPaused) {
         // It's paused
         _timer?.cancel();
         setState(() {
           _isRunning = false;
           _startTime = null;
-          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
-          _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
+          if (cycle != null) {
+            _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+            _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
+          }
         });
       } else {
         // Idle/Stopped
@@ -177,7 +184,6 @@ class _DrumControlState extends ConsumerState<DrumControl> {
         }
 
       } else {
-        // Start the drum
         await cycleRepo.startDrumController(
           batchId: batchId,
           machineId: widget.machine.machineId,
@@ -185,12 +191,6 @@ class _DrumControlState extends ConsumerState<DrumControl> {
           cycles: 1, // Defaulting to 1 cycle continuously
           duration: 'Continuous', 
         );
-
-        setState(() {
-          _isRunning = true;
-          _startTime = DateTime.now();
-        });
-        _startTimer();
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

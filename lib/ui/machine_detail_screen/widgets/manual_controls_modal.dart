@@ -78,27 +78,32 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       });
       final drumCycle = drumCycles.isEmpty ? null : drumCycles.first;
       
-      if (drumCycle != null && liveMachine.drumActive) {
+      if (liveMachine.drumActive) {
+        // Start/Continue timer based on machine activity
         if (!_drumRunning) {
           _drumRunning = true;
           _startDrumTimer();
         }
         
-        if (drumCycle.action == 'started') {
-          // Once the real 'started' cycle arrives, override the optimistic start time with the server's time
+        if (drumCycle != null && drumCycle.action == 'started') {
+          // Precise calibration from database cycle
           _drumStartTime = drumCycle.startedAt ?? _drumStartTime ?? DateTime.now();
           _drumAccumulatedSeconds = drumCycle.accumulatedRuntimeSeconds ?? drumCycle.totalRuntimeSeconds ?? 0;
         } else if (_drumStartTime == null) {
-          // If the machine is active but we only have an old 'stopped' document so far, optimistically start now
+          // Fallback if no cycle doc yet
           _drumStartTime = DateTime.now();
           _drumAccumulatedSeconds = 0;
         }
-      } else if (drumCycle != null && liveMachine.drumPaused) {
+      } else if (liveMachine.drumPaused) {
+        // Handle Paused state
         _drumRunning = false;
         _drumTimer?.cancel();
-        _drumAccumulatedSeconds = drumCycle.accumulatedRuntimeSeconds ?? drumCycle.totalRuntimeSeconds ?? 0;
-        _drumUptime = _formatDuration(Duration(seconds: _drumAccumulatedSeconds));
+        if (drumCycle != null) {
+          _drumAccumulatedSeconds = drumCycle.accumulatedRuntimeSeconds ?? drumCycle.totalRuntimeSeconds ?? 0;
+          _drumUptime = _formatDuration(Duration(seconds: _drumAccumulatedSeconds));
+        }
       } else {
+        // Stopped/Idle
         _resetDrumState();
       }
 
@@ -112,27 +117,32 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       });
       final aeratorCycle = aeratorCycles.isEmpty ? null : aeratorCycles.first;
 
-      if (aeratorCycle != null && liveMachine.aeratorActive) {
+      if (liveMachine.aeratorActive) {
+        // Start/Continue timer based on machine activity
         if (!_aeratorRunning) {
           _aeratorRunning = true;
           _startAeratorTimer();
         }
         
-        if (aeratorCycle.action == 'started') {
-          // Once the real 'started' cycle arrives, override the optimistic start time with the server's time
+        if (aeratorCycle != null && aeratorCycle.action == 'started') {
+          // Precise calibration from database cycle
           _aeratorStartTime = aeratorCycle.startedAt ?? _aeratorStartTime ?? DateTime.now();
           _aeratorAccumulatedSeconds = aeratorCycle.accumulatedRuntimeSeconds ?? aeratorCycle.totalRuntimeSeconds ?? 0;
         } else if (_aeratorStartTime == null) {
-          // If the machine is active but we only have an old 'stopped' document so far, optimistically start now
+          // Fallback if no cycle doc yet
           _aeratorStartTime = DateTime.now();
           _aeratorAccumulatedSeconds = 0;
         }
-      } else if (aeratorCycle != null && liveMachine.aeratorPaused) {
+      } else if (liveMachine.aeratorPaused) {
+        // Handle Paused state
         _aeratorRunning = false;
         _aeratorTimer?.cancel();
-        _aeratorAccumulatedSeconds = aeratorCycle.accumulatedRuntimeSeconds ?? aeratorCycle.totalRuntimeSeconds ?? 0;
-        _aeratorUptime = _formatDuration(Duration(seconds: _aeratorAccumulatedSeconds));
+        if (aeratorCycle != null) {
+          _aeratorAccumulatedSeconds = aeratorCycle.accumulatedRuntimeSeconds ?? aeratorCycle.totalRuntimeSeconds ?? 0;
+          _aeratorUptime = _formatDuration(Duration(seconds: _aeratorAccumulatedSeconds));
+        }
       } else {
+        // Stopped/Idle
         _resetAeratorState();
       }
 
@@ -204,27 +214,12 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       if (_drumRunning) {
         final elapsed = _drumStartTime != null ? DateTime.now().difference(_drumStartTime!).inSeconds : 0;
         
-        // Optimistic UI update
-        _drumTimer?.cancel();
-        setState(() {
-          _drumRunning = false;
-          _drumUptime = '00:00:00';
-          _drumAccumulatedSeconds = 0;
-        });
-
         await cycleRepo.stopDrumController(
           batchId: batchId,
           totalRuntimeSeconds: _drumAccumulatedSeconds + elapsed,
           expectedStatus: 'running',
         );
       } else {
-        // Optimistic UI update
-        setState(() {
-          _drumRunning = true;
-          _drumStartTime = DateTime.now();
-        });
-        _startDrumTimer();
-
         await cycleRepo.startDrumController(
           batchId: batchId,
           machineId: widget.machine.machineId,
@@ -254,27 +249,12 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       if (_aeratorRunning) {
         final elapsed = _aeratorStartTime != null ? DateTime.now().difference(_aeratorStartTime!).inSeconds : 0;
         
-        // Optimistic UI update
-        _aeratorTimer?.cancel();
-        setState(() {
-          _aeratorRunning = false;
-          _aeratorUptime = '00:00:00';
-          _aeratorAccumulatedSeconds = 0;
-        });
-
         await cycleRepo.stopAerator(
           batchId: batchId,
           totalRuntimeSeconds: _aeratorAccumulatedSeconds + elapsed,
           expectedStatus: 'running',
         );
       } else {
-        // Optimistic UI update
-        setState(() {
-          _aeratorRunning = true;
-          _aeratorStartTime = DateTime.now();
-        });
-        _startAeratorTimer();
-
         await cycleRepo.startAerator(
           batchId: batchId,
           machineId: widget.machine.machineId,
