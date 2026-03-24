@@ -1,8 +1,11 @@
-// lib/ui/activity_logs/widgets/web/web_table_row.dart
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/activity_log_item.dart';
+import '../../../../data/models/machine_model.dart';
+import '../../../../data/models/batch_model.dart';
+import '../../../../data/providers/machine_providers.dart';
+import '../../../../data/providers/batch_providers.dart';
 import '../../models/unified_activity_config.dart';
 import '../../models/activity_enums.dart';
 import '../../../core/constants/spacing.dart';
@@ -11,8 +14,8 @@ import '../../../core/themes/web_colors.dart';
 import '../../../core/widgets/table/table_row.dart';
 import '../../../core/widgets/table/table_action_buttons.dart';
 
-/// Displays: Title, Category Badge, Type Chip, Value, Date, and Actions
-class ActivityTableRow extends StatelessWidget {
+/// Displays: Machine/Batch, Title, Category, Type, Value, Date, and Actions
+class ActivityTableRow extends ConsumerWidget {
   final ActivityLogItem item;
   final ValueChanged<ActivityLogItem> onViewDetails;
 
@@ -23,7 +26,29 @@ class ActivityTableRow extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Access machine and batch data for name lookups
+    final machinesAsync = ref.watch(userTeamMachinesProvider);
+    final batchesAsync = ref.watch(userTeamBatchesProvider);
+
+    // Get display machine name (prioritize item.machineName, then lookup, NO ID fallback)
+    final machineName = item.machineName ??
+        machinesAsync.whenOrNull(
+          data: (machines) {
+            final machine = machines.where((m) => m.id == item.machineId).firstOrNull;
+            return machine?.machineName;
+          },
+        );
+
+    // Get display batch name (prioritize item.batchName, then lookup, NO ID fallback)
+    final batchName = item.batchName ??
+        batchesAsync.whenOrNull(
+          data: (batches) {
+            final batch = batches.where((b) => b.id == item.batchId).firstOrNull;
+            return batch?.displayName;
+          },
+        );
+
     final categoryName = UnifiedActivityConfig.getCategoryNameFromActivityType(
       item.type,
     );
@@ -37,6 +62,39 @@ class ActivityTableRow extends StatelessWidget {
       hoverColor: WebColors.hoverBackground,
       cellSpacing: AppSpacing.md,
       cells: [
+        // Machine / Batch Column
+        TableCellWidget(
+          flex: 2,
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (machineName != null)
+                  Text(
+                    machineName,
+                    style: WebTextStyles.body.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                if (batchName != null) ...[
+                  if (machineName != null) const SizedBox(height: 2),
+                  Text(
+                    batchName,
+                    style: WebTextStyles.body.copyWith(
+                      fontSize: 11,
+                      color: WebColors.textLabel,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                if (machineName == null && batchName == null)
+                  const Text('—', style: WebTextStyles.body),
+              ],
+            ),
+          ),
+        ),
+
         // Title Column
         TableCellWidget(
           flex: 2,
@@ -105,4 +163,4 @@ class ActivityTableRow extends StatelessWidget {
       ],
     );
   }
-}
+}

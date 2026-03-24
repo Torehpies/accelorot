@@ -54,6 +54,12 @@ class ActivityTableHeader extends StatelessWidget {
     return TableHeader(
       isLoading: isLoading,
       columns: [
+        // Machine / Batch Column Header
+        const Expanded(
+          flex: 2,
+          child: TableHeaderCell(label: 'Machine / Batch'),
+        ),
+
         // Title Column (sortable)
         Expanded(
           flex: 2,
