@@ -94,6 +94,7 @@ class DesktopTeamManagementView extends ConsumerWidget {
           itemsPerPage: state.pageSize,
           isLoading: state.isLoading,
           onPageChanged: (page) => notifier.goToPage(page - 1),
+          onItemsPerPageChanged: (newSize) => notifier.setPageSize(newSize),
         ),
       ),
     );
