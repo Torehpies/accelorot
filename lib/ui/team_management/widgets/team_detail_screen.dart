@@ -31,6 +31,7 @@ import 'package:flutter_application_1/ui/core/widgets/containers/web_base_contai
 import 'package:flutter_application_1/ui/operator_management/widgets/tabs_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+
 class TeamDetailScreen extends ConsumerStatefulWidget {
   final Team team;
 

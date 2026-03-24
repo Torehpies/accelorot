@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart'; // ADDED
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/constants/spacing.dart';
 import '../../core/themes/web_text_styles.dart';
 
@@ -13,18 +13,15 @@ class FaqSection extends StatefulWidget {
 class _FaqSectionState extends State<FaqSection> {
   int? _expandedIndex;
 
-  // EMAIL LAUNCHING LOGIC (copied from ContactSection)
   Future<void> _launchEmail() async {
-    final email = 'accelorot.management@gmail.com';
-    final subject = 'Inquiry from Accel-O-Rot Website';
+    const email = 'accelorot.management@gmail.com';
+    const subject = 'Inquiry from Accel-O-Rot Website';
 
-    // Try Gmail compose URL first
     final gmailUri = Uri.parse(
-      'https://mail.google.com/mail/?view=cm&fs=1&to=$email&su=$subject'
+      'https://mail.google.com/mail/?view=cm&fs=1&to=$email&su=$subject',
     );
 
     if (!await launchUrl(gmailUri)) {
-      // Fallback to standard mailto
       final mailtoUri = Uri(
         scheme: 'mailto',
         path: email,
@@ -41,47 +38,66 @@ class _FaqSectionState extends State<FaqSection> {
   }
 
   final List<FaqItem> _faqItems = const [
-    // ... (existing FAQ items unchanged) ...
     FaqItem(
       question: 'What is Accel-O-Rot?',
-      answer: 'Accel-O-Rot is an IoT-enabled smart rotary drum composting system designed to accelerate the decomposition of organic waste. It uses sensors, aeration, and moisture regulation to optimize the composting process, making it faster and more efficient than traditional methods.',
+      answer:
+          'Accel-O-Rot is an IoT-enabled smart rotary drum composting system designed to accelerate the decomposition of organic waste. It uses sensors, aeration, and moisture regulation to optimize the composting process, making it faster and more efficient than traditional methods.',
+      icon: Icons.eco_outlined,
     ),
     FaqItem(
       question: 'How does the system accelerate composting?',
-      answer: 'The system uses a rotary drum to continuously mix materials for better aeration and homogeneity. It monitors critical environmental parameters—temperature, moisture, and air quality—and uses automated systems to maintain optimal conditions, which can lead to mature compost in as little as 14 days.',
+      answer:
+          'The system uses a rotary drum to continuously mix materials for better aeration and homogeneity. It monitors critical environmental parameters—temperature, moisture, and air quality—and uses automated systems to maintain optimal conditions, which can lead to mature compost in as little as 14 days.',
+      icon: Icons.speed_outlined,
     ),
     FaqItem(
       question: 'What types of waste can I put in the Accel-O-Rot?',
-      answer: 'The system is designed for organic, biodegradable waste. Users can add a mix of "greens" (e.g., food scraps) and "browns" (e.g., dry leaves) to start the decomposition process.',
+      answer:
+          'The system is designed for organic, biodegradable waste. Users can add a mix of "greens" (e.g., food scraps) and "browns" (e.g., dry leaves) to start the decomposition process.',
+      icon: Icons.delete_outline,
     ),
     FaqItem(
       question: 'What are the main benefits for a community or institution?',
-      answer: 'Accel-O-Rot boosts the ability of barangays and local government units to manage organic waste, simultaneously lowering hauling expenses and reliance on landfills. It greatly lowers methane emissions, unpleasant smells, leachate pollution, and habitats for disease-carrying pests such as flies and rodents—enhancing public health while producing nutrient-dense compost for city gardening and municipal landscaping. For universities and schools, the system reduces waste disposal expenses by transforming cafeteria leftovers and garden waste into compost for campus agricultural initiatives, while also acting as a hands-on learning resource that improves students insights into organic waste management, greenhouse gas mitigation, and intelligent sustainable technologies',
+      answer:
+          'Accel-O-Rot boosts the ability of barangays and LGUs to manage organic waste, lowering hauling expenses and reliance on landfills. It reduces methane emissions, odors, and habitats for disease-carrying pests—enhancing public health while producing nutrient-dense compost for city gardening and landscaping.',
+      icon: Icons.groups_outlined,
     ),
     FaqItem(
       question: 'What types of organic waste can be processed?',
-      answer: 'Accel-O-Rot processes biodegradable waste including kitchen waste like greens and dry leaves for browns. The system guides users through its mobile application to balance these inputs at the optimal carbon-to-nitrogen ratio of 25:1 to 30:1 for rapid, odor-free decomposition, significantly accelerating microbial activity and ensuring uniform compost maturity within 14 days.',
+      answer:
+          'Accel-O-Rot processes biodegradable waste including kitchen greens and dry-leaf browns. The mobile app guides users to balance inputs at the optimal carbon-to-nitrogen ratio of 25:1 to 30:1 for rapid, odor-free decomposition within 14 days.',
+      icon: Icons.recycling_outlined,
     ),
     FaqItem(
-      question: 'How does the system ensure the final product is safe to use as fertilizer?',
-      answer: 'The system design follows the Philippine National Standard for Compost (PNS/BAFS PA 1:2019). By monitoring temperature to ensure it reaches the necessary high-heat (thermophilic) phase, the system helps kill harmful pathogens, making the resulting compost safe for urban agriculture and gardening.',
+      question: 'How does the system ensure the final product is safe?',
+      answer:
+          'The system design follows the Philippine National Standard for Compost (PNS/BAFS PA 1:2019). By monitoring temperature to ensure it reaches the thermophilic phase, the system helps kill harmful pathogens, making the resulting compost safe for urban agriculture and gardening.',
+      icon: Icons.verified_user_outlined,
     ),
   ];
 
   void _toggleCard(int index) {
     setState(() {
-      if (_expandedIndex == index) {
-        _expandedIndex = null;
-      } else {
-        _expandedIndex = index;
-      }
+      _expandedIndex = _expandedIndex == index ? null : index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    final horizontalPadding = width > 1400 ? 120.0 : 24.0;
+    final isMobile = width < 768;
+    final isTablet = width >= 768 && width < 1200;
+
+    // Responsive horizontal padding — clamp to avoid extremes
+    final hPad = width > 1400
+        ? 120.0
+        : width > 900
+            ? 64.0
+            : width > 600
+                ? 32.0
+                : 16.0;
+
+    final greenColor = const Color(0xFF2E7D32);
     final baseContactStyle = TextStyle(
       fontFamily: WebTextStyles.faqAnswer.fontFamily,
       fontSize: 16,
@@ -90,46 +106,95 @@ class _FaqSectionState extends State<FaqSection> {
     );
 
     return Container(
-      color: Colors.white,
-      padding: EdgeInsets.symmetric(
-        horizontal: horizontalPadding,
-        vertical: 80,
-      ),
+      color: const Color(0xFAFAFAFA),
+      padding: EdgeInsets.fromLTRB(hPad, 56, hPad, 80),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 800),
+          constraints: const BoxConstraints(maxWidth: 1200),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // ── Section Header ───────────────────────────────────────
               Text(
                 'Frequently Asked Questions',
-                style: WebTextStyles.faqSectionTitle.copyWith(
-                  fontSize: width > 600 ? 32 : 26,
+                style: TextStyle(
+                  fontFamily: WebTextStyles.faqSectionTitle.fontFamily,
+                  fontSize: width > 600 ? 40 : 28,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.black87,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               Text(
-                'Clear, concise answers to help you understand how Accel-O-Rot works — from setup to safety and performance.',
-                style: WebTextStyles.faqSectionSubtitle,
+                "Here's what other people are finding most useful right now:",
+                style: TextStyle(
+                  fontFamily: WebTextStyles.faqSectionSubtitle.fontFamily,
+                  fontSize: isMobile ? 14 : 16,
+                  color: Colors.black54,
+                  height: 1.5,
+                ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
 
-              // FAQ cards
-              for (int i = 0; i < _faqItems.length; i++)
-                _FaqCard(
-                  faq: _faqItems[i],
-                  isExpanded: _expandedIndex == i,
-                  onToggle: () => _toggleCard(i),
-                ),
-              
-              // CONTACT SECTION WITH CLICKABLE EMAIL
-              SizedBox(height: AppSpacing.xl),
+              // ── Responsive card grid (no fixed aspect ratio) ─────────
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final cols = isMobile ? 1 : isTablet ? 2 : 3;
+                  final spacing = 20.0;
+                  final itemWidth = cols == 1
+                      ? constraints.maxWidth
+                      : (constraints.maxWidth - spacing * (cols - 1)) / cols;
+
+                  // Build rows manually to allow variable card heights
+                  final rows = <Widget>[];
+                  for (var r = 0;
+                      r < (_faqItems.length / cols).ceil();
+                      r++) {
+                    final rowItems = <Widget>[];
+                    for (var c = 0; c < cols; c++) {
+                      final idx = r * cols + c;
+                      if (idx >= _faqItems.length) {
+                        // Filler to keep columns aligned
+                        rowItems.add(SizedBox(width: itemWidth));
+                      } else {
+                        rowItems.add(
+                          SizedBox(
+                            width: itemWidth,
+                            child: _FaqCard(
+                              faq: _faqItems[idx],
+                              isExpanded: _expandedIndex == idx,
+                              onToggle: () => _toggleCard(idx),
+                              greenColor: greenColor,
+                            ),
+                          ),
+                        );
+                      }
+                      if (c < cols - 1) {
+                        rowItems.add(SizedBox(width: spacing));
+                      }
+                    }
+                    rows.add(
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: rowItems,
+                      ),
+                    );
+                    if (r < (_faqItems.length / cols).ceil() - 1) {
+                      rows.add(SizedBox(height: spacing));
+                    }
+                  }
+
+                  return Column(children: rows);
+                },
+              ),
+
+              // ── Contact prompt ────────────────────────────────────────
+              const SizedBox(height: AppSpacing.xl),
               Center(
                 child: Wrap(
                   alignment: WrapAlignment.center,
-                  spacing: 0,
                   children: [
                     Text(
                       'If you have any questions, please contact us at ',
@@ -142,7 +207,7 @@ class _FaqSectionState extends State<FaqSection> {
                         child: Text(
                           'accelorot.management@gmail.com',
                           style: baseContactStyle.copyWith(
-                            color: const Color(0xFF1A73E8), // Professional blue
+                            color: const Color(0xFF1A73E8),
                             decoration: TextDecoration.underline,
                             decorationColor: const Color(0xFF1A73E8),
                             decorationThickness: 1.2,
@@ -150,10 +215,7 @@ class _FaqSectionState extends State<FaqSection> {
                         ),
                       ),
                     ),
-                    Text(
-                      '.',
-                      style: baseContactStyle,
-                    ),
+                    Text('.', style: baseContactStyle),
                   ],
                 ),
               ),
@@ -165,14 +227,17 @@ class _FaqSectionState extends State<FaqSection> {
   }
 }
 
-// ... (FaqItem and _FaqCard classes remain unchanged) ...
+// ─────────────────────────────────────────────────────────────────────────────
+
 class FaqItem {
   final String question;
   final String answer;
+  final IconData icon;
 
   const FaqItem({
     required this.question,
     required this.answer,
+    required this.icon,
   });
 }
 
@@ -180,54 +245,118 @@ class _FaqCard extends StatelessWidget {
   final FaqItem faq;
   final bool isExpanded;
   final VoidCallback onToggle;
+  final Color greenColor;
 
   const _FaqCard({
     required this.faq,
     required this.isExpanded,
     required this.onToggle,
+    required this.greenColor,
   });
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            title: Text(
+    return GestureDetector(
+      onTap: onToggle,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(24),
+        // No Expanded — card grows with content
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Icon badge
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: greenColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(faq.icon, size: 20, color: greenColor),
+            ),
+            const SizedBox(height: 16),
+
+            // Question
+            Text(
               faq.question,
               style: TextStyle(
                 fontFamily: WebTextStyles.faqQuestion.fontFamily,
-                fontSize: WebTextStyles.faqQuestion.fontSize,
-                fontWeight: isExpanded ? FontWeight.w600 : WebTextStyles.faqQuestion.fontWeight,
-                color: WebTextStyles.faqQuestion.color,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+                height: 1.3,
               ),
             ),
-            trailing: RotationTransition(
-              turns: AlwaysStoppedAnimation(isExpanded ? 0.5 : 0.0),
-              child: Icon(
-                Icons.keyboard_arrow_down,
-                size: 24,
-                color: Colors.black.withValues(alpha: 0.7),
-              ),
-            ),
-            onTap: onToggle,
-          ),
-          if (isExpanded)
-            Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
-              child: Text(
+            const SizedBox(height: 12),
+
+            // Answer — clipped to 3 lines when collapsed
+            AnimatedCrossFade(
+              duration: const Duration(milliseconds: 250),
+              crossFadeState: isExpanded
+                  ? CrossFadeState.showSecond
+                  : CrossFadeState.showFirst,
+              firstChild: Text(
                 faq.answer,
-                style: WebTextStyles.faqAnswer,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontFamily: WebTextStyles.faqAnswer.fontFamily,
+                  fontSize: 14,
+                  color: Colors.black54,
+                  height: 1.5,
+                ),
+              ),
+              secondChild: Text(
+                faq.answer,
+                style: TextStyle(
+                  fontFamily: WebTextStyles.faqAnswer.fontFamily,
+                  fontSize: 14,
+                  color: Colors.black54,
+                  height: 1.5,
+                ),
               ),
             ),
-        ],
+
+            // "Learn more" chip — only when collapsed
+            if (!isExpanded) ...[
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.bottomRight,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: greenColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    'Learn more',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: greenColor,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }

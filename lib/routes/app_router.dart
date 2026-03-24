@@ -37,9 +37,9 @@ import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landing_page_view.dart';
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
-import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
-import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
 import 'package:flutter_application_1/ui/onboarding/view/resent_email_sent_screen.dart';
+import 'package:flutter_application_1/ui/web_landing_page/dialogs/terms_of_service_dialog.dart';
+import 'package:flutter_application_1/ui/web_landing_page/dialogs/policy_bottom_sheet.dart';
 import 'package:flutter_application_1/ui/splashscreen/views/splash_screen_view.dart';
 import 'package:flutter_application_1/ui/qr_scan/view/qr_scan_screen.dart';
 import 'package:flutter_application_1/ui/social_login/view/complete_profile_screen.dart';
@@ -65,6 +65,44 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: RoutePath.initial.name,
         builder: (context, state) => const ResponsiveLandingPageView(),
       ),
+      // Section deep-link routes — all render the landing page scrolled to the
+      // appropriate section so that URLs like /#/features work on direct visit.
+      GoRoute(
+        path: '/features',
+        name: 'landing-features',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'features'),
+      ),
+      GoRoute(
+        path: '/how-it-works',
+        name: 'landing-how-it-works',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'how-it-works'),
+      ),
+      GoRoute(
+        path: '/impact',
+        name: 'landing-impact',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'impact'),
+      ),
+      GoRoute(
+        path: '/downloads',
+        name: 'landing-downloads',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'download'),
+      ),
+      GoRoute(
+        path: '/faqs',
+        name: 'landing-faqs',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'faq'),
+      ),
+      GoRoute(
+        path: '/contact',
+        name: 'landing-contact',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'contact'),
+      ),
       GoRoute(
         path: '/download',
         name: 'download',
@@ -73,12 +111,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/terms-of-service',
         name: 'terms-of-service',
-        builder: (context, state) => const TermsOfServicePage(),
+        builder: (context, state) => const TermsOfServiceDialog(),
       ),
       GoRoute(
         path: '/privacy-policy',
         name: 'privacy-policy',
-        builder: (context, state) => const PrivacyPolicyPage(),
+        builder: (context, state) => const PrivacyPolicyDialog(),
       ),
       GoRoute(
         path: RoutePath.loading.path,

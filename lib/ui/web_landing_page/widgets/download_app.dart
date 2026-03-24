@@ -1,9 +1,10 @@
 // lib/ui/web_landing_page/views/download_app.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/ui/primary_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'app_header.dart';
 import 'web_header.dart';
+import '../../core/themes/app_theme.dart';
 
 class AppSpacing {
   static const double xs = 8.0;
@@ -21,595 +22,322 @@ class DownloadApp extends StatefulWidget {
   State<DownloadApp> createState() => _DownloadAppState();
 }
 
-class _DownloadAppState extends State<DownloadApp> with TickerProviderStateMixin {
+class _DownloadAppState extends State<DownloadApp> {
   bool _isMenuOpen = false;
-  late PageController _carouselController;
-  late AnimationController _autoPlayController;
-  int _currentCarouselIndex = 0;
 
-  final List<String> carouselImages = [
-    'assets/images/phone/7.png',
-    'assets/images/phone/8.png',
-    'assets/images/phone/9.png',
-    'assets/images/phone/10.png',
-    'assets/images/phone/11.png',
-    'assets/images/phone/12.png',
-    'assets/images/phone/13.png',
-    'assets/images/phone/14.png',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _carouselController = PageController(
-      initialPage: 0,
-      viewportFraction: 0.95,
+  Future<void> _downloadApk() async {
+    final Uri url = Uri.parse(
+      "https://firebasestorage.googleapis.com/v0/b/accel-o-rot.firebasestorage.app/o/accel-o-rot-app.apk?alt=media&token=56490298-4701-45b9-bd35-ba6a39748465",
     );
-    
-    _autoPlayController = AnimationController(
-      duration: const Duration(seconds: 5),
-      vsync: this,
-    )..repeat();
-    
-    _setupAutoPlay();
-  }
-
-  void _setupAutoPlay() {
-    _autoPlayController.addListener(() {
-      if (_autoPlayController.isCompleted) {
-        _nextCarouselPage();
-        _autoPlayController.reset();
-        _autoPlayController.forward();
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not start download. Please try again.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
-    });
-  }
-
-  void _nextCarouselPage() {
-    if (_carouselController.hasClients) {
-      _carouselController.nextPage(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
     }
-  }
-
-  void _previousCarouselPage() {
-    if (_carouselController.hasClients) {
-      _carouselController.previousPage(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _carouselController.dispose();
-    _autoPlayController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 900;
-    
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 900;
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
-        children: [
-          // Background image
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/bg.png',
-              fit: BoxFit.cover,
-              cacheHeight: 1000,
-              cacheWidth: 1000,
-              colorBlendMode: BlendMode.modulate,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xFF22C55E).withValues(alpha: 0.1),
-                        const Color(0xFF16A34A).withValues(alpha: 0.15),
-                      ],
-                    ),
-                  )
-                );
-              },
-            ),
-          ),
-          // Main content with responsive layout
-          SafeArea(
-            child: Column(
-              children: [
-                // Conditional header based on screen size
-                if (isMobile)
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppHeader(
-                        onHomeTap: () {
-                          setState(() => _isMenuOpen = false);
-                          context.go('/');
-                        },
-                        onMenuTap: () => setState(() => _isMenuOpen = !_isMenuOpen),
-                        isScrolled: true,
-                      ),
-                      // Menu dropdown
-                      if (_isMenuOpen)
-                        _MobileMenu(
-                          onLogin: () {
-                            setState(() => _isMenuOpen = false);
-                            context.go('/login');
-                          },
-                          onGetStarted: () {
-                            setState(() => _isMenuOpen = false);
-                            context.go('/signup');
-                          },
-                          onNavigateHome: () {
-                            setState(() => _isMenuOpen = false);
-                            context.go('/');
-                          },
-                          onToggleMenu: () => setState(() => _isMenuOpen = false),
-                        ),
-                    ],
-                  )
-                else
-                  WebHeader(
-                    onBreadcrumbTap: (section) {
+      backgroundColor: AppColors.background1,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header (responsive)
+            if (isMobile)
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppHeader(
+                    onHomeTap: () {
+                      setState(() => _isMenuOpen = false);
                       context.go('/');
                     },
-                    onLogin: () {
-                      context.go('/login');
-                    },
-                    onGetStarted: () {
-                      context.go('/signup');
-                    },
-                    activeSection: 'download',
+                    onMenuTap: () => setState(() => _isMenuOpen = !_isMenuOpen),
                     isScrolled: true,
-                    showActions: true,
                   ),
-                // Main content area - responsive layout
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final isMobile = constraints.maxWidth < 900;
-                      
-                      if (isMobile) {
-                        // Mobile layout - content on top, carousel below
-                        return ScrollConfiguration(
-                          behavior: ScrollConfiguration.of(context).copyWith(
-                            scrollbars: false,
-                          ),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                // Mobile content on top
-                                _buildMobileContentSection(constraints),
-                                // Mobile carousel below
-                                _buildMobileCarousel(constraints),
-                              ],
-                            ),
-                          ),
-                        );
-                      } else {
-                        // Desktop layout - carousel on left, content on right
-                        return Row(
-                          children: [
-                            // Left side - Carousel
-                            Expanded(
-                              flex: 1,
-                              child: _buildDesktopCarousel(constraints),
-                            ),
-                            // Right side - Content
-                            Expanded(
-                              flex: 1,
-                              child: _buildDesktopContentSection(constraints),
-                            ),
-                          ],
-                        );
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Image courtesy credit - bottom right
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
+                  if (_isMenuOpen)
+                    _MobileMenu(
+                      onLogin: () {
+                        setState(() => _isMenuOpen = false);
+                        context.go('/login');
+                      },
+                      onGetStarted: () {
+                        setState(() => _isMenuOpen = false);
+                        context.go('/signup');
+                      },
+                      onNavigateHome: () {
+                        setState(() => _isMenuOpen = false);
+                        context.go('/');
+                      },
+                      onToggleMenu: () => setState(() => _isMenuOpen = false),
+                    ),
+                ],
+              )
+            else
+              WebHeader(
+                onBreadcrumbTap: (_) => context.go('/'),
+                onLogin: () => context.go('/login'),
+                onGetStarted: () => context.go('/signup'),
+                activeSection: 'download',
+                isScrolled: true,
+                showActions: true,
               ),
-              child: const Text(
-                'Image courtesy of A1 Organics',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+
+            // Main Content - Split Screen Design
+            Expanded(
+              child: isMobile
+                  ? _buildMobileLayout()
+                  : _buildDesktopLayout(),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildDesktopCarousel(BoxConstraints constraints) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xxxl),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Carousel container with shadow effect
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF22C55E).withValues(alpha: 0.3),
-                    blurRadius: 40,
-                    spreadRadius: 2,
+
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 60),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [AppColors.background, Colors.white],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // Title
+                  const Text(
+                    "Download the Accel-O-Rot App",
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.green100,
+                      height: 1.2,
+                    ),
                   ),
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 8),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Subtitle
+                  const Text(
+                    "Get our AI-powered mobile app to monitor your composting system, "
+                    "receive real-time insights, and manage your organic waste efficiently.\n"
+                    "Available for Android.",
+                    style: TextStyle(
+                      fontSize: 18,
+                      height: 1.6,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxxl),
+
+                  // Download Button
+                  SizedBox(
+                    width: 260,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _downloadApk,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.green100,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "Download APK v1.0",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+
+                  // Optional secondary action (e.g., view features)
+                  TextButton(
+                    onPressed: () => context.go('/features'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.black54,
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: const Text(
+                      "View all features →",
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
                 ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
-                child: Stack(
-                  children: [
-                    // Carousel pages
-                    PageView.builder(
-                      controller: _carouselController,
-                      onPageChanged: (index) {
-                        setState(() => _currentCarouselIndex = index);
-                        _autoPlayController.reset();
-                        _autoPlayController.forward();
-                      },
-                      itemCount: carouselImages.length,
-                      itemBuilder: (context, index) {
-                        return _buildCarouselItem(carouselImages[index]);
-                      },
-                    ),
-                    // Gradient overlay for depth
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black.withValues(alpha: 0.1),
-                              Colors.transparent,
-                              Colors.black.withValues(alpha: 0.15),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
+            ),
+          ),
+        ),
+
+        Expanded(
+          flex: 2,
+          child: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/mockup.png"),
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+              ),
+            ),
+            child: Container(
+              // Optional overlay for depth
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.05),
                   ],
                 ),
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.xl),
-          // Navigation controls
-          _buildCarouselControls(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMobileCarousel(BoxConstraints constraints) {
-    return Container(
-      height: 500,
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg, horizontal: AppSpacing.sm),
-      child: Column(
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: PageView.builder(
-                controller: _carouselController,
-                onPageChanged: (index) {
-                  setState(() => _currentCarouselIndex = index);
-                  _autoPlayController.reset();
-                  _autoPlayController.forward();
-                },
-                itemCount: carouselImages.length,
-                itemBuilder: (context, index) {
-                  return _buildCarouselItem(carouselImages[index]);
-                },
-              ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          _buildCarouselControls(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCarouselItem(String imagePath) {
-    return Container(
-      color: Colors.white.withValues(alpha: 0.05),
-      child: Center(
-        child: Hero(
-          tag: imagePath,
-          child: Image.asset(
-            imagePath,
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                color: Colors.grey.withValues(alpha: 0.2),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.image_not_supported_outlined,
-                        color: Colors.white.withValues(alpha: 0.5),
-                        size: 48,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Image not found',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildCarouselControls() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Previous button
-          _buildNavButton(
-            icon: Icons.chevron_left,
-            onPressed: _previousCarouselPage,
-          ),
-          // Indicator dots
-          Expanded(
-            child: Center(
-              child: ScrollConfiguration(
-                behavior: ScrollConfiguration.of(context).copyWith(
-                  scrollbars: false,
-                ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: List.generate(
-                      carouselImages.length,
-                      (index) => GestureDetector(
-                        onTap: () {
-                          _carouselController.animateToPage(
-                            index,
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          height: 8,
-                          width: _currentCarouselIndex == index ? 24 : 8,
-                          decoration: BoxDecoration(
-                            color: _currentCarouselIndex == index
-                                ? const Color(0xFF22C55E)
-                                : Colors.white.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Next button
-          _buildNavButton(
-            icon: Icons.chevron_right,
-            onPressed: _nextCarouselPage,
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildNavButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.3),
-              width: 1.5,
-            ),
-            borderRadius: BorderRadius.circular(12),
-            color: Colors.white.withValues(alpha: 0.08),
-          ),
-          child: Icon(
-            icon,
-            color: const Color(0xFF22C55E),
-            size: 20,
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Mobile content section - minimal padding, compact layout
-  Widget _buildMobileContentSection(BoxConstraints constraints) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.lg),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style: TextStyle(
-                fontFamily: 'dm-sans',
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                height: 1.2,
-                color: Colors.white,
-              ),
-              children: const [
-                TextSpan(text: 'Download the\n'),
-                TextSpan(
-                  text: 'Accel-O-Rot App',
-                  style: TextStyle(
-                    color: Color(0xFF22C55E),
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            'Get our AI-powered mobile app to monitor your composting system, '
-            'receive real-time insights, and manage your organic waste efficiently.\n'
-            'Available for Android.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.6,
-              color: Colors.white.withValues(alpha: 0.9),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xl),
-          SizedBox(
-            width: MediaQuery.of(context).size.width * 0.85,
-            height: 56,
-            child: PrimaryButton(
-              text: 'Download APK v1.0.0',
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Downloading Accel-O-Rot v1.0.0.apk'),
-                    backgroundColor: Color(0xFF22C55E),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Desktop content section - original styling
-  Widget _buildDesktopContentSection(BoxConstraints constraints) {
-    return Center(
+  Widget _buildMobileLayout() {
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       child: SingleChildScrollView(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 500),
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xl,
-            vertical: AppSpacing.xxxl,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: const TextStyle(
-                    fontFamily: 'dm-sans',
-                    fontSize: 48,
-                    fontWeight: FontWeight.w800,
-                    height: 1.2,
-                    color: Colors.white,
-                  ),
-                  children: const [
-                    TextSpan(text: 'Download the\n'),
-                    TextSpan(
-                      text: 'Accel-O-Rot App',
+        child: Column(
+          children: [
+            // Content Section
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl,
+                vertical: AppSpacing.xxxl,
+              ),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [AppColors.background, Colors.white],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // Title
+                  RichText(
+                    textAlign: TextAlign.center,
+                    text: const TextSpan(
                       style: TextStyle(
-                        color: Color(0xFF22C55E),
+                        fontSize: 32,
                         fontWeight: FontWeight.w800,
+                        height: 1.2,
+                        color: Colors.black87,
+                      ),
+                      children: [
+                        TextSpan(text: 'Download the\n'),
+                        TextSpan(
+                          text: 'Accel-O-Rot App',
+                          style: TextStyle(color: AppColors.green100),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Subtitle
+                  Text(
+                    'Get our AI-powered mobile app to monitor your composting system, '
+                    'receive real-time insights, and manage your organic waste efficiently.\n'
+                    'Available for Android.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 15,
+                      height: 1.6,
+                      color: Colors.black54,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxxl),
+
+                  // Download Button (full width on mobile)
+                  SizedBox(
+                    width: double.infinity,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: _downloadApk,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.green100,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "Download APK v1.0.0",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Text(
-                  'Get our AI-powered mobile app to monitor your composting system, '
-                  'receive real-time insights, and manage your organic waste efficiently.\n'
-                  'Available for Android.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 18,
-                    height: 1.6,
-                    color: Colors.white.withValues(alpha: 0.9),
                   ),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xxxl),
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 280),
-                child: SizedBox(
-                  width: 260,
-                  height: 56,
-                  child: PrimaryButton(
-                    text: 'Download APK v1.0.0',
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Downloading Accel-O-Rot v1.0.0.apk'),
-                          backgroundColor: Color(0xFF22C55E),
-                        ),
-                      );
-                    },
+                  const SizedBox(height: AppSpacing.md),
+
+                  TextButton(
+                    onPressed: () => context.go('/features'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.black54,
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: const Text(
+                      "View all features →",
+                      style: TextStyle(fontSize: 14),
+                    ),
                   ),
+                ],
+              ),
+            ),
+
+            // Mockup Image Section
+            Container(
+              height: 400,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage("assets/images/mockup.png"),
+                  fit: BoxFit.cover,
+                  alignment: Alignment.topCenter,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -650,64 +378,41 @@ class _MobileMenu extends StatelessWidget {
           ],
         ),
         child: ScrollConfiguration(
-          behavior: ScrollConfiguration.of(context).copyWith(
-            scrollbars: false,
-          ),
+          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back to Home
-                _buildMenuItem(
-                  'Back to Home',
-                  () {
-                    onNavigateHome();
-                    onToggleMenu();
-                  },
-                ),
-                
+                _buildMenuItem('Back to Home', () {
+                  onNavigateHome();
+                  onToggleMenu();
+                }),
                 const Divider(height: 32, thickness: 1, color: Color(0xFFE5E7EB)),
-                
-                // Legal Links
-                _buildLegalLink(
-                  context,
-                  'Privacy Policy',
-                  () {
-                    onToggleMenu();
-                    context.go('/privacy-policy');
-                  },
-                ),
-                _buildLegalLink(
-                  context,
-                  'Terms of Service',
-                  () {
-                    onToggleMenu();
-                    context.go('/terms-of-service');
-                  },
-                ),
-                
+                _buildLegalLink(context, 'Privacy Policy', () {
+                  onToggleMenu();
+                  context.go('/privacy-policy');
+                }),
+                _buildLegalLink(context, 'Terms of Service', () {
+                  onToggleMenu();
+                  context.go('/terms-of-service');
+                }),
                 const SizedBox(height: 24),
-                
-                // Action Buttons
                 SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: OutlinedButton(
                     onPressed: onLogin,
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF22C55E),
-                      side: const BorderSide(color: Color(0xFF22C55E), width: 2),
+                      foregroundColor: AppColors.green100,
+                      side: const BorderSide(color: AppColors.green100, width: 2),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     child: const Text(
                       'Login',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -718,7 +423,7 @@ class _MobileMenu extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: onGetStarted,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF22C55E),
+                      backgroundColor: AppColors.green100,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -727,10 +432,7 @@ class _MobileMenu extends StatelessWidget {
                     ),
                     child: const Text(
                       'Get Started',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     ),
                   ),
                 ),
@@ -750,9 +452,6 @@ class _MobileMenu extends StatelessWidget {
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-        ),
         child: Text(
           label,
           style: const TextStyle(

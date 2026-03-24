@@ -36,6 +36,7 @@ dependencies:
   rxdart: ^0.28.0
   gauge_indicator: ^0.4.3
   firebase_messaging: ^16.1.2
+  web: 1.1.1
 
 dev_dependencies:
   flutter_test:
