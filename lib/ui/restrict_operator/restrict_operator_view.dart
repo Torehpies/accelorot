@@ -9,7 +9,7 @@ class RestrictOperatorView extends StatelessWidget {
 
   Future<void> downloadApk() async {
     final Uri url = Uri.parse(
-      "https://firebasestorage.googleapis.com/v0/b/accel-o-rot.firebasestorage.app/o/accel-o-rot-app.apk?alt=media&token=56490298-4701-45b9-bd35-ba6a39748465",
+      "https://firebasestorage.googleapis.com/v0/b/accel-o-rot.firebasestorage.app/o/accel-o-rot-app.apk?alt=media&token=ac77cf37-81d0-433a-8668-eeaa9ef62107",
     );
 
     await launchUrl(url, mode: LaunchMode.externalApplication);
