@@ -56,12 +56,12 @@ class PsgcRepositoryRemote implements PsgcRepository {
 
       if (citiesResponse.statusCode == 200) {
         final List<dynamic> citiesData = json.decode(citiesResponse.body);
-        allItems.addAll(citiesData.map((e) => PsgcCityMunicipality.fromJson(e)));
+        allItems.addAll(citiesData.map((e) => PsgcCityMunicipality.fromJson(e).copyWith(isCity: true)));
       }
 
       if (municipalitiesResponse.statusCode == 200) {
         final List<dynamic> municipalitiesData = json.decode(municipalitiesResponse.body);
-        allItems.addAll(municipalitiesData.map((e) => PsgcCityMunicipality.fromJson(e)));
+        allItems.addAll(municipalitiesData.map((e) => PsgcCityMunicipality.fromJson(e).copyWith(isCity: false)));
       }
       
       allItems.sort((a, b) => a.name.compareTo(b.name));
@@ -83,12 +83,12 @@ class PsgcRepositoryRemote implements PsgcRepository {
 
       if (citiesResponse.statusCode == 200) {
         final List<dynamic> citiesData = json.decode(citiesResponse.body);
-        allItems.addAll(citiesData.map((e) => PsgcCityMunicipality.fromJson(e)));
+        allItems.addAll(citiesData.map((e) => PsgcCityMunicipality.fromJson(e).copyWith(isCity: true)));
       }
 
       if (municipalitiesResponse.statusCode == 200) {
          final List<dynamic> municipalitiesData = json.decode(municipalitiesResponse.body);
-         allItems.addAll(municipalitiesData.map((e) => PsgcCityMunicipality.fromJson(e)));
+         allItems.addAll(municipalitiesData.map((e) => PsgcCityMunicipality.fromJson(e).copyWith(isCity: false)));
       }
       
       allItems.sort((a, b) => a.name.compareTo(b.name));

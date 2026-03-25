@@ -10,7 +10,7 @@ abstract class PsgcCityMunicipality with _$PsgcCityMunicipality {
     required String name,
     required String? provinceCode,
     required String? regionCode,
-    // Add other fields if needed
+    @Default(true) bool isCity,
   }) = _PsgcCityMunicipality;
 
   factory PsgcCityMunicipality.fromJson(Map<String, dynamic> json) =>

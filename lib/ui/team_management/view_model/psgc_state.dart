@@ -161,18 +161,11 @@ class PsgcNotifier extends _$PsgcNotifier {
 
     if (city != null) {
       final repository = ref.read(psgcRepositoryProvider);
-      // Try both endpoints or determine type (simplification: assume city code format usually works or we try both if needed)
-      // Since our repo has specific methods, let's try city first, if empty try municipality or rely on object property if we had it.
-      // For now, let's assume we can try both or the repo handles it. 
-      // Actually, the API has separate endpoints.
-      // Let's try as city first.
       
-      var result = await repository.getBarangaysByCityCode(city.code);
-      
-      if (result.isFailure) {
-          // If city failed, try municipality
-          result = await repository.getBarangaysByMunicipalityCode(city.code);
-      }
+      // Use the isCity flag to determine which endpoint to call
+      final result = city.isCity
+          ? await repository.getBarangaysByCityCode(city.code)
+          : await repository.getBarangaysByMunicipalityCode(city.code);
 
       result.when(
         success: (barangays) {
@@ -182,7 +175,6 @@ class PsgcNotifier extends _$PsgcNotifier {
           );
         },
         failure: (error) {
-           // If both failed
           state = state.copyWith(
             isLoading: false,
             error: error.toString(),
