@@ -27,12 +27,14 @@ class AppSnackbar {
       backgroundColor: _backgroundColor(type),
       duration: duration,
       behavior: SnackBarBehavior.floating,
-      margin: EdgeInsets.fromLTRB(
-        16,
-        0,
-        16,
-        viewPadding.bottom + viewInsets.bottom + _defaultBottomSpacing,
-      ),
+      margin: MediaQuery.of(context).size.width > 600
+          ? null
+          : EdgeInsets.fromLTRB(
+              16,
+              0,
+              16,
+              viewPadding.bottom + viewInsets.bottom + _defaultBottomSpacing,
+            ),
       width: MediaQuery.of(context).size.width > 600
           ? 600 // max width on wide screens
           : null,

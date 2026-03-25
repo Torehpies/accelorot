@@ -17,8 +17,9 @@ class AeratorControl extends ConsumerStatefulWidget {
 
 class _AeratorControlState extends ConsumerState<AeratorControl> {
   Timer? _timer;
-  String _uptime = '00:00:00';
+  String _uptime = '00:00';
   bool _isLoading = false;
+  bool? _intendedState; // Tracks what state we are waiting for
   
   // State from Firestore
   bool _isRunning = false;
@@ -60,25 +61,43 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
       
       if (!mounted) return;
 
-      if (cycle != null && widget.machine.aeratorActive) {
-        // It's actively running
+      setState(() {
+        if (_intendedState != null) {
+          if (widget.machine.aeratorActive == _intendedState!) {
+            _isLoading = false;
+            _intendedState = null;
+          }
+        } else {
+          _isLoading = false;
+        }
+      });
+
+      if (widget.machine.aeratorActive) {
+        // It's actively running (database status)
         setState(() {
           _isRunning = true;
-          _startTime = cycle.startedAt ?? DateTime.now();
-          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+          if (cycle != null && cycle.action == 'started') {
+            _startTime = cycle.startedAt ?? _startTime ?? DateTime.now();
+            _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+          } else {
+            _startTime ??= DateTime.now();
+            _accumulatedSeconds = 0;
+          }
           
           final elapsed = DateTime.now().difference(_startTime!).inSeconds;
           _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds + elapsed));
         });
         _startTimer();
-      } else if (cycle != null && !widget.machine.aeratorActive && widget.machine.aeratorPaused) {
+      } else if (!widget.machine.aeratorActive && widget.machine.aeratorPaused) {
         // It's paused
         _timer?.cancel();
         setState(() {
           _isRunning = false;
           _startTime = null;
-          _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
-          _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
+          if (cycle != null) {
+            _accumulatedSeconds = cycle.accumulatedRuntimeSeconds ?? cycle.totalRuntimeSeconds ?? 0;
+            _uptime = _formatDuration(Duration(seconds: _accumulatedSeconds));
+          }
         });
       } else {
         // Idle/Stopped
@@ -96,7 +115,7 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
         _isRunning = false;
         _startTime = null;
         _accumulatedSeconds = 0;
-        _uptime = '00:00:00';
+        _uptime = '00:00';
       });
     }
   }
@@ -115,10 +134,9 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$hours:$minutes:$seconds';
+    return '$minutes:$seconds';
   }
 
   Future<void> _toggleAerator() async {
@@ -140,7 +158,11 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _intendedState = !_isRunning;
+    });
+    
     final cycleRepo = ref.read(cycleRepositoryProvider);
 
     try {
@@ -158,12 +180,6 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
         );
 
         _timer?.cancel();
-        setState(() {
-          _isRunning = false;
-          _startTime = null;
-          _accumulatedSeconds = 0; 
-          _uptime = '00:00:00';
-        });
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -172,7 +188,6 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
         }
 
       } else {
-        // Start the aerator
         await cycleRepo.startAerator(
           batchId: batchId,
           machineId: widget.machine.machineId,
@@ -180,12 +195,6 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
           cycles: 1, 
           duration: 'Continuous', 
         );
-
-        setState(() {
-          _isRunning = true;
-          _startTime = DateTime.now();
-        });
-        _startTimer();
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -195,12 +204,14 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
       }
     } catch (e) {
       if (mounted) {
+        setState(() {
+          _isLoading = false; // Clear loading on error
+          _intendedState = null;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to toggle Aerator: $e'), backgroundColor: Colors.red),
         );
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 

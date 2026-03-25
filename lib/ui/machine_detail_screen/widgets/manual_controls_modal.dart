@@ -21,6 +21,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
   String _drumUptime = '00:00';
   bool _drumLoading = false;
   bool _drumRunning = false;
+  bool? _intendedDrumState;
   DateTime? _drumStartTime;
   int _drumAccumulatedSeconds = 0;
 
@@ -29,6 +30,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
   String _aeratorUptime = '00:00';
   bool _aeratorLoading = false;
   bool _aeratorRunning = false;
+  bool? _intendedAeratorState;
   DateTime? _aeratorStartTime;
   int _aeratorAccumulatedSeconds = 0;
 
@@ -56,8 +58,6 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
   }
 
   Future<void> _loadStates() async {
-    if (_drumLoading || _aeratorLoading) return;
-
     try {
       final liveMachine = ref.read(machineStreamProvider(widget.machine.machineId)).value ?? widget.machine;
       final batchId = liveMachine.currentBatchId;
@@ -78,27 +78,53 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       });
       final drumCycle = drumCycles.isEmpty ? null : drumCycles.first;
       
-      if (drumCycle != null && liveMachine.drumActive) {
+      // Apply intent tracking for loading states
+      setState(() {
+        if (_intendedDrumState != null) {
+          if (liveMachine.drumActive == _intendedDrumState!) {
+            _drumLoading = false;
+            _intendedDrumState = null;
+          }
+        } else {
+          _drumLoading = false;
+        }
+
+        if (_intendedAeratorState != null) {
+          if (liveMachine.aeratorActive == _intendedAeratorState!) {
+            _aeratorLoading = false;
+            _intendedAeratorState = null;
+          }
+        } else {
+          _aeratorLoading = false;
+        }
+      });
+
+      if (liveMachine.drumActive) {
+        // Start/Continue timer based on machine activity
         if (!_drumRunning) {
           _drumRunning = true;
           _startDrumTimer();
         }
         
-        if (drumCycle.action == 'started') {
-          // Once the real 'started' cycle arrives, override the optimistic start time with the server's time
+        if (drumCycle != null && drumCycle.action == 'started') {
+          // Precise calibration from database cycle
           _drumStartTime = drumCycle.startedAt ?? _drumStartTime ?? DateTime.now();
           _drumAccumulatedSeconds = drumCycle.accumulatedRuntimeSeconds ?? drumCycle.totalRuntimeSeconds ?? 0;
         } else if (_drumStartTime == null) {
-          // If the machine is active but we only have an old 'stopped' document so far, optimistically start now
+          // Fallback if no cycle doc yet
           _drumStartTime = DateTime.now();
           _drumAccumulatedSeconds = 0;
         }
-      } else if (drumCycle != null && liveMachine.drumPaused) {
+      } else if (liveMachine.drumPaused) {
+        // Handle Paused state
         _drumRunning = false;
         _drumTimer?.cancel();
-        _drumAccumulatedSeconds = drumCycle.accumulatedRuntimeSeconds ?? drumCycle.totalRuntimeSeconds ?? 0;
-        _drumUptime = _formatDuration(Duration(seconds: _drumAccumulatedSeconds));
+        if (drumCycle != null) {
+          _drumAccumulatedSeconds = drumCycle.accumulatedRuntimeSeconds ?? drumCycle.totalRuntimeSeconds ?? 0;
+          _drumUptime = _formatDuration(Duration(seconds: _drumAccumulatedSeconds));
+        }
       } else {
+        // Stopped/Idle
         _resetDrumState();
       }
 
@@ -112,27 +138,32 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       });
       final aeratorCycle = aeratorCycles.isEmpty ? null : aeratorCycles.first;
 
-      if (aeratorCycle != null && liveMachine.aeratorActive) {
+      if (liveMachine.aeratorActive) {
+        // Start/Continue timer based on machine activity
         if (!_aeratorRunning) {
           _aeratorRunning = true;
           _startAeratorTimer();
         }
         
-        if (aeratorCycle.action == 'started') {
-          // Once the real 'started' cycle arrives, override the optimistic start time with the server's time
+        if (aeratorCycle != null && aeratorCycle.action == 'started') {
+          // Precise calibration from database cycle
           _aeratorStartTime = aeratorCycle.startedAt ?? _aeratorStartTime ?? DateTime.now();
           _aeratorAccumulatedSeconds = aeratorCycle.accumulatedRuntimeSeconds ?? aeratorCycle.totalRuntimeSeconds ?? 0;
         } else if (_aeratorStartTime == null) {
-          // If the machine is active but we only have an old 'stopped' document so far, optimistically start now
+          // Fallback if no cycle doc yet
           _aeratorStartTime = DateTime.now();
           _aeratorAccumulatedSeconds = 0;
         }
-      } else if (aeratorCycle != null && liveMachine.aeratorPaused) {
+      } else if (liveMachine.aeratorPaused) {
+        // Handle Paused state
         _aeratorRunning = false;
         _aeratorTimer?.cancel();
-        _aeratorAccumulatedSeconds = aeratorCycle.accumulatedRuntimeSeconds ?? aeratorCycle.totalRuntimeSeconds ?? 0;
-        _aeratorUptime = _formatDuration(Duration(seconds: _aeratorAccumulatedSeconds));
+        if (aeratorCycle != null) {
+          _aeratorAccumulatedSeconds = aeratorCycle.accumulatedRuntimeSeconds ?? aeratorCycle.totalRuntimeSeconds ?? 0;
+          _aeratorUptime = _formatDuration(Duration(seconds: _aeratorAccumulatedSeconds));
+        }
       } else {
+        // Stopped/Idle
         _resetAeratorState();
       }
 
@@ -147,7 +178,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     _drumRunning = false;
     _drumStartTime = null;
     _drumAccumulatedSeconds = 0;
-    _drumUptime = '00:00:00';
+    _drumUptime = '00:00';
   }
 
   void _resetAeratorState() {
@@ -155,7 +186,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     _aeratorRunning = false;
     _aeratorStartTime = null;
     _aeratorAccumulatedSeconds = 0;
-    _aeratorUptime = '00:00:00';
+    _aeratorUptime = '00:00';
   }
 
   void _startDrumTimer() {
@@ -184,10 +215,9 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$hours:$minutes:$seconds';
+    return '$minutes:$seconds';
   }
 
   Future<void> _toggleDrum() async {
@@ -197,34 +227,23 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    setState(() => _drumLoading = true);
+    setState(() {
+      _drumLoading = true;
+      _intendedDrumState = !_drumRunning;
+    });
     final cycleRepo = ref.read(cycleRepositoryProvider);
 
     try {
       if (_drumRunning) {
         final elapsed = _drumStartTime != null ? DateTime.now().difference(_drumStartTime!).inSeconds : 0;
         
-        // Optimistic UI update
-        _drumTimer?.cancel();
-        setState(() {
-          _drumRunning = false;
-          _drumUptime = '00:00:00';
-          _drumAccumulatedSeconds = 0;
-        });
-
         await cycleRepo.stopDrumController(
           batchId: batchId,
           totalRuntimeSeconds: _drumAccumulatedSeconds + elapsed,
           expectedStatus: 'running',
         );
+        _drumTimer?.cancel();
       } else {
-        // Optimistic UI update
-        setState(() {
-          _drumRunning = true;
-          _drumStartTime = DateTime.now();
-        });
-        _startDrumTimer();
-
         await cycleRepo.startDrumController(
           batchId: batchId,
           machineId: widget.machine.machineId,
@@ -235,8 +254,12 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       }
     } catch (e) {
       debugPrint('Error toggling drum: $e');
-    } finally {
-      if (mounted) setState(() => _drumLoading = false);
+      if (mounted) {
+        setState(() {
+          _drumLoading = false;
+          _intendedDrumState = null;
+        });
+      }
     }
   }
 
@@ -247,34 +270,23 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    setState(() => _aeratorLoading = true);
+    setState(() {
+      _aeratorLoading = true;
+      _intendedAeratorState = !_aeratorRunning;
+    });
     final cycleRepo = ref.read(cycleRepositoryProvider);
 
     try {
       if (_aeratorRunning) {
         final elapsed = _aeratorStartTime != null ? DateTime.now().difference(_aeratorStartTime!).inSeconds : 0;
         
-        // Optimistic UI update
-        _aeratorTimer?.cancel();
-        setState(() {
-          _aeratorRunning = false;
-          _aeratorUptime = '00:00:00';
-          _aeratorAccumulatedSeconds = 0;
-        });
-
         await cycleRepo.stopAerator(
           batchId: batchId,
           totalRuntimeSeconds: _aeratorAccumulatedSeconds + elapsed,
           expectedStatus: 'running',
         );
+        _aeratorTimer?.cancel();
       } else {
-        // Optimistic UI update
-        setState(() {
-          _aeratorRunning = true;
-          _aeratorStartTime = DateTime.now();
-        });
-        _startAeratorTimer();
-
         await cycleRepo.startAerator(
           batchId: batchId,
           machineId: widget.machine.machineId,
@@ -285,8 +297,12 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       }
     } catch (e) {
       debugPrint('Error toggling aerator: $e');
-    } finally {
-      if (mounted) setState(() => _aeratorLoading = false);
+      if (mounted) {
+        setState(() {
+          _aeratorLoading = false;
+          _intendedAeratorState = null;
+        });
+      }
     }
   }
 

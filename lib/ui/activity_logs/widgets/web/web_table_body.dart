@@ -38,6 +38,12 @@ class ActivityTableBody extends StatelessWidget {
     return GenericTableRow(
       cellSpacing: AppSpacing.md,
       cells: [
+        // Machine / Batch Column
+        TableCellWidget(
+          flex: 2,
+          child: Center(child: _SkeletonBox(width: 120, height: 16)),
+        ),
+
         // Title Column
         TableCellWidget(
           flex: 2,
