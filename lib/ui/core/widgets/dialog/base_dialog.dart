@@ -48,7 +48,7 @@ class BaseDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Headera
+            // Header
             DialogHeader(title: title, subtitle: subtitle, canClose: canClose),
 
             // Content (scrollable)

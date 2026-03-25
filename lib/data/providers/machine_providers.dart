@@ -3,6 +3,7 @@ import '../services/firebase/firebase_machine_service.dart';
 import '../repositories/machine_repository/machine_repository.dart';
 import '../repositories/machine_repository/machine_repository_remote.dart';
 import '../models/machine_model.dart';
+import 'profile_providers.dart';
 
 // Service Provider
 final machineServiceProvider = Provider<FirebaseMachineService>((ref) {
@@ -39,3 +40,30 @@ final machineByIdProvider = FutureProvider.family<MachineModel?, String>((
   final repository = ref.watch(machineRepositoryProvider);
   return repository.getMachineById(machineId);
 });
+
+/// AsyncNotifier for user's team machines
+class UserTeamMachinesNotifier extends AsyncNotifier<List<MachineModel>> {
+  @override
+  Future<List<MachineModel>> build() async {
+    final repository = ref.watch(machineRepositoryProvider);
+    final profileRepo = ref.watch(profileRepositoryProvider);
+
+    // Get current user's profile to get teamId
+    final profile = await profileRepo.getCurrentProfile();
+    if (profile?.teamId == null) return [];
+
+    return repository.getMachinesByTeam(profile!.teamId!);
+  }
+
+  /// Refresh machines manually
+  Future<void> refresh() async {
+    state = const AsyncLoading();
+    state = await AsyncValue.guard(() => build());
+  }
+}
+
+/// Provider using the AsyncNotifier
+final userTeamMachinesProvider =
+    AsyncNotifierProvider<UserTeamMachinesNotifier, List<MachineModel>>(
+      () => UserTeamMachinesNotifier(),
+    );

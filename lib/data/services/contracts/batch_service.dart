@@ -34,6 +34,7 @@ abstract class BatchService {
   /// Get all active batches for a list of machine IDs
   /// Handles Firestore's whereIn limit (10 items) automatically
   Future<List<QueryDocumentSnapshot>> getBatchesForMachines(
-    List<String> machineIds,
-  );
+    List<String> machineIds, {
+    DateTime? cutoffDate,
+  });
 }

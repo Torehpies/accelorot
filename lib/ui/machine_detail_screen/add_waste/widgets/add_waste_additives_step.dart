@@ -58,7 +58,9 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
   @override
   void initState() {
     super.initState();
+
     _selected = Set.from(widget.selectedAdditives);
+
     if (_selected.isNotEmpty) {
       _hasAdditives = true;
     }
@@ -77,6 +79,7 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
       } else {
         _selected.add(label);
       }
+      
       widget.onAdditivesChanged(_selected);
     });
   }
@@ -124,7 +127,7 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
         
         // Headline
         const Text(
-          'Naglagay ka ba ng\nadditives?',
+          'Did you add any\nadditives?',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24,
@@ -141,7 +144,7 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
           children: [
             Expanded(
               child: _buildToggleButton(
-                label: 'Oo, naglagay',
+                label: 'Yes',
                 isSelected: _hasAdditives == true,
                 icon: Icons.check,
                 selectedColor: const Color(0xFF439657), // Compact green
@@ -154,7 +157,7 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
             const SizedBox(width: 12),
             Expanded(
               child: _buildToggleButton(
-                label: 'Wala',
+                label: 'No',
                 isSelected: _hasAdditives == false,
                 icon: Icons.close,
                 selectedColor: const Color(0xFF547589),
@@ -254,7 +257,7 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                'Piliin ang iyong mga additives',
+                'Choose your additives',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -302,7 +305,7 @@ class _AddWasteAdditivesStepState extends ConsumerState<AddWasteAdditivesStep> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Walang additives — noted!',
+              'No additives — noted!',
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,

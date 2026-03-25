@@ -26,6 +26,9 @@ abstract class BatchRepository {
   Future<List<String>> getTeamMachineIds(String teamId);
 
   /// Get all active batches for machines
-  Future<List<BatchModel>> getBatchesForMachines(List<String> machineIds);
+  Future<List<BatchModel>> getBatchesForMachines(
+    List<String> machineIds, {
+    DateTime? cutoffDate,
+  });
   Future<BatchModel?> getActiveBatchForMachine(String machineId);
 }

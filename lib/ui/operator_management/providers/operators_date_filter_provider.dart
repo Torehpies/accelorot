@@ -3,7 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'operators_date_filter_provider.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class OperatorsDateFilter extends _$OperatorsDateFilter {
   @override
   DateFilterRange build() {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 enum SnackbarType { success, error, info }
 
 class AppSnackbar {
+  static const double _defaultBottomSpacing = 24;
   static void show(
     BuildContext context, {
     required String message,
@@ -10,6 +12,8 @@ class AppSnackbar {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
+    final viewInsets = MediaQuery.of(context).viewInsets;
+    final viewPadding = MediaQuery.of(context).viewPadding;
     final snackBar = SnackBar(
       content: Row(
         children: [
@@ -23,6 +27,14 @@ class AppSnackbar {
       backgroundColor: _backgroundColor(type),
       duration: duration,
       behavior: SnackBarBehavior.floating,
+      margin: MediaQuery.of(context).size.width > 600
+          ? null
+          : EdgeInsets.fromLTRB(
+              16,
+              0,
+              16,
+              viewPadding.bottom + viewInsets.bottom + _defaultBottomSpacing,
+            ),
       width: MediaQuery.of(context).size.width > 600
           ? 600 // max width on wide screens
           : null,
@@ -48,11 +60,11 @@ class AppSnackbar {
   static Color _backgroundColor(SnackbarType type) {
     switch (type) {
       case SnackbarType.success:
-        return Colors.green;
+        return AppColors.green100;
       case SnackbarType.error:
-        return Colors.red;
+        return AppColors.error;
       case SnackbarType.info:
-        return Colors.blue;
+        return AppColors.blueForeground;
     }
   }
 

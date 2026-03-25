@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 // lib/data/providers/activity_providers.dart
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,13 +19,22 @@ import 'core_providers.dart';
 /// Provider for ActivityAggregatorService
 /// Depends on all repository providers
 final activityAggregatorProvider = Provider<ActivityAggregatorService>((ref) {
-  return ActivityAggregatorService(
+  final service = ActivityAggregatorService(
     substrateRepo: ref.watch(substrateRepositoryProvider),
     alertRepo: ref.watch(alertRepositoryProvider),
     reportRepo: ref.watch(reportRepositoryProvider),
     cycleRepo: ref.watch(cycleRepositoryProvider),
     auth: FirebaseAuth.instance,
   );
+
+  // Clear memory cache when user logs out or switches accounts
+  ref.listen(authStateChangesProvider, (previous, next) {
+    if (previous?.value?.uid != next?.value?.uid) {
+      service.clearCache();
+    }
+  });
+
+  return service;
 });
 
 // ===== ACTIVITY FILTER SERVICE PROVIDER =====
@@ -43,7 +53,14 @@ final allActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref.watch(authStateChangesProvider);
 
   final aggregator = ref.watch(activityAggregatorProvider);
-  final result = await aggregator.getAllActivitiesWithCache();
+  
+  // Fetch up to 50 latest activities from the last 7 days
+  // forceRefresh: true ensures it bypasses the aggregator's 5-minute memory cache
+  // since FutureProvider inherently handles its own state caching lifecycle.
+  final result = await aggregator.getAllActivitiesWithCache(
+    limit: 50,
+    filterRecentDays: 7,
+  );
   return result.items;
 });
 
@@ -52,7 +69,7 @@ final substrateActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref,
 ) async {
   final aggregator = ref.watch(activityAggregatorProvider);
-  return aggregator.getSubstrates();
+  return aggregator.getSubstrates(limit: 50, cutoffDate: DateTime.now().subtract(const Duration(days: 7)));
 });
 
 /// Provider for alerts only
@@ -60,7 +77,7 @@ final alertActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref,
 ) async {
   final aggregator = ref.watch(activityAggregatorProvider);
-  return aggregator.getAlerts();
+  return aggregator.getAlerts(limit: 50, cutoffDate: DateTime.now().subtract(const Duration(days: 7)));
 });
 
 /// Provider for cycles only
@@ -68,7 +85,7 @@ final cycleActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref,
 ) async {
   final aggregator = ref.watch(activityAggregatorProvider);
-  return aggregator.getCyclesRecom();
+  return aggregator.getCyclesRecom(limit: 50, cutoffDate: DateTime.now().subtract(const Duration(days: 7)));
 });
 
 /// Provider for reports only
@@ -76,7 +93,7 @@ final reportActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   ref,
 ) async {
   final aggregator = ref.watch(activityAggregatorProvider);
-  return aggregator.getReports();
+  return aggregator.getReports(limit: 50);
 });
 
 /// Provider for activities filtered by user's team
@@ -90,15 +107,23 @@ final userTeamActivitiesProvider = FutureProvider<List<ActivityLogItem>>((
   final profileRepo = ref.watch(profileRepositoryProvider);
   final batchRepo = ref.watch(batchRepositoryProvider);
 
-  // Get user's team
+  // Start fetching activities immediately (doesn't depend on teamId yet)
+  final sw = Stopwatch()..start();
+  final activitiesFuture = aggregator.getAllActivitiesWithCache(
+    limit: 50,
+    filterRecentDays: 7,
+  );
+
+  // Get user's team concurrently
   final profile = await profileRepo.getCurrentProfile();
   if (profile?.teamId == null) return [];
 
   // Get team's machine IDs
   final machineIds = await batchRepo.getTeamMachineIds(profile!.teamId!);
 
-  // Get all activities
-  final result = await aggregator.getAllActivitiesWithCache();
+  // Wait for activities to finish
+  final result = await activitiesFuture;
+  debugPrint('userTeamActivitiesProvider load took: ${sw.elapsedMilliseconds}ms');
 
   // Filter activities by team's machines or team membership
   return result.items.where((activity) {
@@ -129,3 +154,6 @@ final allActivitiesStreamProvider = StreamProvider<List<ActivityLogItem>>((ref) 
   final aggregator = ref.watch(activityAggregatorProvider);
   return aggregator.streamAllActivities();
 });
+
+
+

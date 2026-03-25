@@ -11,9 +11,15 @@ import '../widgets/download_section.dart';
 import '../widgets/contact_section.dart';
 import '../widgets/faqs_section.dart';
 import '../view_models/landing_page_view_model.dart';
+import '../dialogs/policy_bottom_sheet.dart';
+import '../dialogs/terms_of_service_dialog.dart';
+import '../../../utils/url_updater.dart';
 
 class MobileLandingPageView extends StatefulWidget {
-  const MobileLandingPageView({super.key});
+  /// Optional initial section to scroll to after the first frame.
+  final String? initialSection;
+
+  const MobileLandingPageView({super.key, this.initialSection});
 
   @override
   State<MobileLandingPageView> createState() => _MobileLandingPageViewState();
@@ -41,6 +47,14 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target =
+          widget.initialSection ?? getInitialSectionFromUrl();
+      if (target != null && target != 'home') {
+        _scrollToSection(target);
+      }
+    });
   }
 
   @override
@@ -69,17 +83,15 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
     };
 
     for (final entry in sections.entries) {
-      final context = entry.value.currentContext;
-      if (context == null) continue;
-
-      final box = context.findRenderObject() as RenderBox?;
+      final ctx = entry.value.currentContext;
+      if (ctx == null) continue;
+      final box = ctx.findRenderObject() as RenderBox?;
       if (box == null) continue;
-
       final offset = box.localToGlobal(Offset.zero).dy;
-
       if (offset <= _headerHeight + 40 && offset >= -200) {
         if (_activeSection != entry.key) {
           setState(() => _activeSection = entry.key);
+          updateLandingPageUrl(entry.key);
         }
         break;
       }
@@ -104,6 +116,8 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
       _activeSection = sectionId;
       _isMenuOpen = false;
     });
+
+    updateLandingPageUrl(sectionId);
 
     Scrollable.ensureVisible(
       key!.currentContext!,
@@ -137,10 +151,8 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
             controller: _scrollController,
             child: Column(
               children: [
-                // Header spacing
                 SizedBox(height: _headerHeight),
-                
-                // HOME SECTION
+
                 Container(
                   key: _homeKey,
                   child: IntroSection(
@@ -148,38 +160,26 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
                     onLearnMore: _handleLearnMore,
                   ),
                 ),
-                
-                // FEATURES SECTION
                 Container(
                   key: _featuresKey,
                   child: FeaturesSection(features: _viewModel.features),
                 ),
-                
-                // HOW IT WORKS SECTION
                 Container(
                   key: _howItWorksKey,
                   child: HowItWorksSection(steps: _viewModel.steps),
                 ),
-                
-                // IMPACT SECTION
                 Container(
                   key: _impactKey,
                   child: ImpactSection(stats: _viewModel.impactStats),
                 ),
-                
-                // DOWNLOAD SECTION
                 Container(
                   key: _downloadKey,
                   child: DownloadSection(onDownload: _handleDownload),
                 ),
-                
-                // FAQ SECTION
                 Container(
                   key: _faqKey,
                   child: const FaqSection(),
                 ),
-                
-                // CONTACT SECTION
                 Container(
                   key: _contactKey,
                   child: ContactSection(
@@ -206,8 +206,7 @@ class _MobileLandingPageViewState extends State<MobileLandingPageView> {
                   onMenuTap: () => setState(() => _isMenuOpen = !_isMenuOpen),
                   isScrolled: _isScrolled,
                 ),
-                
-                /// Menu dropdown with proper constraints and scrolling
+
                 if (_isMenuOpen)
                   _MobileMenu(
                     activeSection: _activeSection,
@@ -243,7 +242,6 @@ class _MobileMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    // Maximum height for menu dropdown - leave room for header and some content visibility
     final maxMenuHeight = screenHeight - 120;
 
     return Material(
@@ -251,10 +249,7 @@ class _MobileMenu extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         width: double.infinity,
-        // 👈 CRITICAL FIX: Use max height constraint to prevent cropping
-        constraints: BoxConstraints(
-          maxHeight: maxMenuHeight,
-        ),
+        constraints: BoxConstraints(maxHeight: maxMenuHeight),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
@@ -265,45 +260,41 @@ class _MobileMenu extends StatelessWidget {
             ),
           ],
         ),
-        // 👈 CRITICAL FIX: SingleChildScrollView allows menu to scroll when it exceeds max height
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Navigation Items
-              _buildMenuItem('Home', 'home', activeSection, onBreadcrumbTap, onToggleMenu),
-              _buildMenuItem('Features', 'features', activeSection, onBreadcrumbTap, onToggleMenu),
-              _buildMenuItem('How It Works', 'how-it-works', activeSection, onBreadcrumbTap, onToggleMenu),
-              _buildMenuItem('Impact', 'impact', activeSection, onBreadcrumbTap, onToggleMenu),
-              _buildMenuItem('Downloads', 'download', activeSection, onBreadcrumbTap, onToggleMenu),
-              _buildMenuItem('FAQ', 'faq', activeSection, onBreadcrumbTap, onToggleMenu),
-              _buildMenuItem('Contact', 'contact', activeSection, onBreadcrumbTap, onToggleMenu),
-              
+              _buildMenuItem('Home', 'home', activeSection, onBreadcrumbTap,
+                  onToggleMenu),
+              _buildMenuItem('Features', 'features', activeSection,
+                  onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem('How It Works', 'how-it-works', activeSection,
+                  onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem('Impact', 'impact', activeSection, onBreadcrumbTap,
+                  onToggleMenu),
+              _buildMenuItem('Downloads', 'download', activeSection,
+                  onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem(
+                  'FAQ', 'faq', activeSection, onBreadcrumbTap, onToggleMenu),
+              _buildMenuItem('Contact', 'contact', activeSection,
+                  onBreadcrumbTap, onToggleMenu),
+
               const Divider(height: 32, thickness: 1, color: Color(0xFFE5E7EB)),
-              
-              // Legal Links
-              _buildLegalLink(
-                context,
-                'Privacy Policy',
-                () {
-                  onToggleMenu();
-                  context.go('/privacy-policy');
-                },
-              ),
-              _buildLegalLink(
-                context,
-                'Terms of Service',
-                () {
-                  onToggleMenu();
-                  context.go('/terms-of-service');
-                },
-              ),
-              
+
+              // Legal links — shown as bottom sheets on mobile
+              _buildLegalLink(context, 'Privacy Policy', () {
+                onToggleMenu();
+                PrivacyPolicyDialog.showModal(context);
+              }),
+              _buildLegalLink(context, 'Terms of Service', () {
+                onToggleMenu();
+                TermsOfServiceDialog.showModal(context);
+              }),
+
               const SizedBox(height: 24),
-              
-              // Action Buttons
+
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -372,30 +363,37 @@ class _MobileMenu extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        padding:
+            const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFFDCFCE7) : Colors.transparent,
+          color:
+              isActive ? const Color(0xFFDCFCE7) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 16,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-            color: isActive ? const Color(0xFF22C55E) : const Color(0xFF4B5563),
+            fontWeight:
+                isActive ? FontWeight.w600 : FontWeight.w500,
+            color: isActive
+                ? const Color(0xFF22C55E)
+                : const Color(0xFF4B5563),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildLegalLink(BuildContext context, String label, VoidCallback onTap) {
+  Widget _buildLegalLink(
+      BuildContext context, String label, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+        padding:
+            const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
         child: Text(
           label,
           style: const TextStyle(

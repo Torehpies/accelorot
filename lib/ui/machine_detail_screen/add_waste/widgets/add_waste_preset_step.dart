@@ -57,7 +57,7 @@ class _AddWastePresetStepState extends ConsumerState<AddWastePresetStep> {
         
         // Headline
         const Text(
-          'Ano ang iyong mga\nnilagay?',
+          'What did you\nadd?',
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 24,

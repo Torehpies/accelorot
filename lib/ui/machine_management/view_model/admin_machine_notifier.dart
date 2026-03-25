@@ -219,7 +219,7 @@ class AdminMachineState {
   }
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AdminMachineNotifier extends _$AdminMachineNotifier {
   static const int _pageSize = 5;
 

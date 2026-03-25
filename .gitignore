@@ -77,4 +77,7 @@ TODO.md
 *.freezed.dart
 *.mocks.dart
 
+# ignore local scripts used for seeding/moving test data
+/script/*.dart
+
 .env

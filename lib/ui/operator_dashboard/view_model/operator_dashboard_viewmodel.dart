@@ -17,9 +17,9 @@ MachineAggregatorService operatorDashboardAggregatorService(Ref ref) {
 }
 
 // ===== OPERATOR DASHBOARD VIEW MODEL =====
-@riverpod
+@Riverpod(keepAlive: true)
 class OperatorDashboardViewModel extends _$OperatorDashboardViewModel {
-  late final MachineAggregatorService _aggregator;
+  late MachineAggregatorService _aggregator;
 
   @override
   OperatorDashboardState build() {
@@ -30,6 +30,13 @@ class OperatorDashboardViewModel extends _$OperatorDashboardViewModel {
   // ===== INITIALIZATION =====
 
   Future<void> initialize(String teamId) async {
+    // If we already have machines loaded successfully, do nothing.
+    // This prevents the dashboard from reloading when the user
+    // navigates away (tab switch) and comes back.
+    if (state.status == LoadingStatus.success && state.machines.isNotEmpty) {
+      return;
+    }
+
     state = state.copyWith(status: LoadingStatus.loading, errorMessage: null);
 
     try {

@@ -7,6 +7,7 @@ import '../../../../data/models/machine_model.dart';
 import '../../../../data/providers/cycle_providers.dart';
 import '../../../../data/providers/substrate_providers.dart';
 import 'manual_controls_modal.dart';
+import 'rotation_history_screen.dart';
 
 
 class RotationScheduleCard extends ConsumerStatefulWidget {
@@ -339,7 +340,23 @@ class _RotationScheduleCardState extends ConsumerState<RotationScheduleCard> {
                         letterSpacing: 1.2,
                       ),
                     ),
-
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => RotationHistoryScreen(machine: widget.machine),
+                        ),
+                      ),
+                      child: const Text(
+                        'VIEW HISTORY',
+                        style: TextStyle(
+                          color: Color(0xFF3B717B),
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),

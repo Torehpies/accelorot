@@ -33,15 +33,17 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
       state = state.copyWith(
         currentPage: pageIndex,
         teams: cachedPage,
+        hasNextPage: cachedPage.length == state.pageSize,
         isLoading: false,
       );
       return;
     }
     state = state.copyWith(isLoading: true);
+    
+    // Use repository instead of service
+    final repo = ref.read(teamRepositoryProvider);
 
-    final service = ref.read(teamServiceProvider);
-
-    final result = await service.fetchTeamsPage(
+    final result = await repo.fetchTeamsPage(
       pageSize: state.pageSize,
       pageIndex: pageIndex,
     );
@@ -90,6 +92,20 @@ class TeamManagementNotifier extends _$TeamManagementNotifier {
       ..remove(state.currentPage);
     state = state.copyWith(pagesByIndex: updatedPages, lastFetchedAt: null);
     await _loadPage(state.currentPage);
+  }
+
+  Future<void> setPageSize(int pageSize) async {
+    if (state.pageSize == pageSize) return;
+    
+    // Reset pages cache when page size changes because the chunking is different
+    state = state.copyWith(
+      pageSize: pageSize,
+      currentPage: 0,
+      pagesByIndex: {}, 
+      lastFetchedAt: null,
+    );
+    
+    await _loadPage(0);
   }
 
   void clearError() {

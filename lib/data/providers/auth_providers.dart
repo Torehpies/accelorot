@@ -29,6 +29,7 @@ AuthRepository authRepository(Ref ref) {
   final userService = ref.read(appUserServiceProvider);
   final googleSignIn = GoogleSignIn.instance;
 	final teamService = ref.read(teamServiceProvider);
+  final pushNotificationService = ref.read(pushNotificationServiceProvider);
 
   return AuthRepositoryRemote(
     authService,
@@ -37,7 +38,8 @@ AuthRepository authRepository(Ref ref) {
     firebaseAuth,
     userService,
     googleSignIn,
-		teamService
+		teamService,
+    pushNotificationService,
   );
 }
 

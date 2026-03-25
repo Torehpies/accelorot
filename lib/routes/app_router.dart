@@ -2,12 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/forgot_pass.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/restricted_access_screen.dart';
+import 'package:flutter_application_1/ui/onboarding/view/forgot_pass.dart';
+import 'package:flutter_application_1/ui/onboarding/view/restricted_access_screen.dart';
 import 'package:flutter_application_1/ui/approval/view/approval_view.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/machine_management/view/admin_machine_screen.dart';
-import 'package:flutter_application_1/ui/machine_management/view/operator_machine_screen.dart';
 import 'package:flutter_application_1/ui/profile_screen/view/profile_screen.dart';
 import 'package:flutter_application_1/routes/app_route_redirect.dart';
 import 'package:flutter_application_1/routes/navigations/admin_mobile_shell.dart';
@@ -36,17 +35,18 @@ import 'package:flutter_application_1/ui/web_landing_page/widgets/download_app.d
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_application_1/ui/statistics/view/responsive_statistics.dart';
 import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landing_page_view.dart';
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
-import 'package:flutter_application_1/ui/web_landing_page/widgets/terms_of_service_page.dart';
-import 'package:flutter_application_1/ui/web_landing_page/widgets/privacy_policy_page.dart';
-import 'package:flutter_application_1/frontend/screens/Onboarding/resent_email_sent_screen.dart';
+import 'package:flutter_application_1/ui/onboarding/view/resent_email_sent_screen.dart';
+import 'package:flutter_application_1/ui/web_landing_page/dialogs/terms_of_service_dialog.dart';
+import 'package:flutter_application_1/ui/web_landing_page/dialogs/policy_bottom_sheet.dart';
 import 'package:flutter_application_1/ui/splashscreen/views/splash_screen_view.dart';
 import 'package:flutter_application_1/ui/qr_scan/view/qr_scan_screen.dart';
+import 'package:flutter_application_1/ui/social_login/view/complete_profile_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = ref.watch(routerNotifierProvider);
+
 
   return GoRouter(
     refreshListenable: notifier,
@@ -65,6 +65,44 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: RoutePath.initial.name,
         builder: (context, state) => const ResponsiveLandingPageView(),
       ),
+      // Section deep-link routes — all render the landing page scrolled to the
+      // appropriate section so that URLs like /#/features work on direct visit.
+      GoRoute(
+        path: '/features',
+        name: 'landing-features',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'features'),
+      ),
+      GoRoute(
+        path: '/how-it-works',
+        name: 'landing-how-it-works',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'how-it-works'),
+      ),
+      GoRoute(
+        path: '/impact',
+        name: 'landing-impact',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'impact'),
+      ),
+      GoRoute(
+        path: '/downloads',
+        name: 'landing-downloads',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'download'),
+      ),
+      GoRoute(
+        path: '/faqs',
+        name: 'landing-faqs',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'faq'),
+      ),
+      GoRoute(
+        path: '/contact',
+        name: 'landing-contact',
+        builder: (context, state) =>
+            const ResponsiveLandingPageView(initialSection: 'contact'),
+      ),
       GoRoute(
         path: '/download',
         name: 'download',
@@ -73,12 +111,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/terms-of-service',
         name: 'terms-of-service',
-        builder: (context, state) => const TermsOfServicePage(),
+        builder: (context, state) => const TermsOfServiceDialog(),
       ),
       GoRoute(
         path: '/privacy-policy',
         name: 'privacy-policy',
-        builder: (context, state) => const PrivacyPolicyPage(),
+        builder: (context, state) => const PrivacyPolicyDialog(),
       ),
       GoRoute(
         path: RoutePath.loading.path,
@@ -96,7 +134,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RegistrationScreen(),
       ),
       GoRoute(
+        path: RoutePath.completeProfile.path,
+        name: RoutePath.completeProfile.name,
+        builder: (context, state) => const CompleteProfileScreen(),
+      ),
+      GoRoute(
         path: RoutePath.forgotPassword.path,
+
         name: RoutePath.forgotPassword.name,
         builder: (context, state) => const ForgotPassScreen(),
       ),
@@ -154,85 +198,63 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const RestrictOperatorView(),
       ),
 
-      // OPERATOR SHELL
-      ShellRoute(
-        builder: (context, state, child) {
-          // if (kIsWeb) {
-          //   return RestrictOperatorView();
-          // }
+      // OPERATOR SHELL — uses StatefulShellRoute to keep each tab's widget
+      // tree alive, preventing the dashboard from reloading on tab switch.
+      StatefulShellRoute.indexedStack(
+        builder: (context, state, navigationShell) {
           final isDesktop =
               MediaQuery.of(context).size.width >= kTabletBreakpoint;
 
           if (isDesktop) {
-            return WebShell(child: child);
+            return WebShell(child: navigationShell);
           } else {
-            return MobileNavigationShell(child: child);
+            return MobileNavigationShell(navigationShell: navigationShell);
           }
         },
-        routes: [
-          GoRoute(
-            path: RoutePath.dashboard.path,
-            name: RoutePath.dashboard.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const ResponsiveDashboard(),
-              key: state.pageKey,
-            ),
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePath.dashboard.path,
+                name: RoutePath.dashboard.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: ResponsiveDashboard(),
+                ),
+              ),
+            ],
           ),
-          GoRoute(
-            path: RoutePath.activity.path,
-            name: RoutePath.activity.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const ActivityLogsRoute(),
-              key: state.pageKey,
-            ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePath.qrScan.path,
+                name: RoutePath.qrScan.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: QRScanScreen(),
+                ),
+              ),
+            ],
           ),
-          GoRoute(
-            path: RoutePath.statistics.path,
-            name: RoutePath.statistics.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const ResponsiveStatistics(),
-              key: state.pageKey,
-            ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePath.operatorReports.path,
+                name: RoutePath.operatorReports.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: ReportsRoute(),
+                ),
+              ),
+            ],
           ),
-          GoRoute(
-            path: RoutePath.operatorMachines.path,
-            name: RoutePath.operatorMachines.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const OperatorMachineScreens(),
-              key: state.pageKey,
-            ),
-          ),
-          GoRoute(
-            path: RoutePath.operatorSettings.path,
-            name: RoutePath.operatorSettings.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const SettingsScreen(),
-            ),
-          ),
-          GoRoute(
-            path: RoutePath.qrScan.path,
-            name: RoutePath.qrScan.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const QRScanScreen(),
-            ),
-          ),
-          GoRoute(
-            path: RoutePath.operatorReports.path,
-            name: RoutePath.operatorReports.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              key: state.pageKey,
-              child: const ReportsRoute(),
-            ),
-          ),
-          GoRoute(
-            path: RoutePath.profile.path,
-            name: RoutePath.profile.name,
-            pageBuilder: (context, state) => NoTransitionPage(
-              child: const ProfileScreenRoute(),
-              key: state.pageKey,
-            ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePath.operatorSettings.path,
+                name: RoutePath.operatorSettings.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: SettingsScreen(),
+                ),
+              ),
+            ],
           ),
         ],
       ),

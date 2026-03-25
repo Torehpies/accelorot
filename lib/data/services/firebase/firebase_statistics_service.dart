@@ -77,21 +77,21 @@ class FirebaseStatisticsService implements StatisticsService {
                   });
                 }
               }
-            } else {
+            /*} else {
                // No readings for this day - add a zero value at midnight
                dailyReadings.add({
                 'id': '$dateStr-00-00-00',
                 'value': 0.0,
                 'timestamp': DateTime(day.year, day.month, day.day, 0, 0, 0),
-              });
+              });*/
             }
           } catch (e) {
             debugPrint('Error fetching day $dateStr: $e');
-             dailyReadings.add({
+             /*dailyReadings.add({
                 'id': '$dateStr-00-00-00',
                 'value': 0.0,
                 'timestamp': DateTime(day.year, day.month, day.day, 0, 0, 0),
-              });
+              });*/
           }
           return dailyReadings;
         }),
@@ -192,60 +192,133 @@ class FirebaseStatisticsService implements StatisticsService {
     try {
       if (batchId.isEmpty) return null;
 
-      // 1. Get the batch to find its creation and completion dates
+      // 1. Fetch exactly ONE document: the batch itself
       final batchDoc = await _db.collection('batches').doc(batchId).get();
       if (!batchDoc.exists) {
         debugPrint('⚠️ Batch not found: $batchId');
         return null;
       }
 
-      final batchData = batchDoc.data()!;
-      DateTime? startDate = _parseTimestamp(batchData['createdAt']);
-      DateTime? endDate = _parseTimestamp(batchData['completedAt']) ?? DateTime.now();
-
-      if (startDate == null) return null;
-
-      // Normalize dates
-      startDate = DateTime(startDate.year, startDate.month, startDate.day);
-      final endDateNormalized = DateTime(endDate.year, endDate.month, endDate.day);
-
-      // 2. Iterate backwards from end date to start date to find the most recent reading
-      for (var day = endDateNormalized;
-           !day.isBefore(startDate);
-           day = day.subtract(const Duration(days: 1))) {
-        
-        final dateStr = day.toIso8601String().substring(0, 10);
-        
-        // 3. Query the time subcollection for this date, ordered by timestamp descending, limit 1
-        final timeSnapshot = await _db
-            .collection('batches')
-            .doc(batchId)
-            .collection('readings')
-            .doc(dateStr)
-            .collection('time')
-            .orderBy('timestamp', descending: true)
-            .limit(1)
-            .get();
-
-        if (timeSnapshot.docs.isNotEmpty) {
-          final doc = timeSnapshot.docs.first;
-          final data = doc.data();
-          
-          return {
-            'temperature': (data['temperature'] ?? 0).toDouble(),
-            'moisture': (data['moisture'] ?? 0).toDouble(),
-            'oxygen': (data['oxygen'] ?? 0).toDouble(),
-            'timestamp': _parseTimestamp(data['timestamp']),
-          };
-        }
+      final data = batchDoc.data()!;
+      
+      // 2. Simply check if the Cloud Function has cached the latest reading
+      if (data.containsKey('latestSensorReadings') && data['latestSensorReadings'] != null) {
+        final latest = data['latestSensorReadings'] as Map<String, dynamic>;
+        return {
+          'temperature': (latest['temperature'] ?? 0).toDouble(),
+          'moisture': (latest['moisture'] ?? 0).toDouble(),
+          'oxygen': (latest['oxygen'] ?? 0).toDouble(),
+          'timestamp': _parseTimestamp(latest['timestamp']),
+        };
       }
 
-      // No readings found in the entire batch period
+      // No cached readings found
       return null;
     } catch (e, stackTrace) {
       debugPrint('❌ Error fetching latest sensor readings: $e');
       debugPrint('Stack: $stackTrace');
       return null;
     }
+  }
+
+  @override
+  Stream<Map<String, dynamic>?> getLatestSensorReadingsStream(String batchId) {
+    if (batchId.isEmpty) return Stream.value(null);
+
+    // Stream directly from the batch document, listening for changes to the latestSensorReadings field
+    return _db
+        .collection('batches')
+        .doc(batchId)
+        .snapshots()
+        .map((snapshot) {
+      if (!snapshot.exists) return null;
+      
+      final data = snapshot.data()!;
+      if (data.containsKey('latestSensorReadings') && data['latestSensorReadings'] != null) {
+        final latest = data['latestSensorReadings'] as Map<String, dynamic>;
+        return {
+          'temperature': (latest['temperature'] ?? 0).toDouble(),
+          'moisture': (latest['moisture'] ?? 0).toDouble(),
+          'oxygen': (latest['oxygen'] ?? 0).toDouble(),
+          'timestamp': _parseTimestamp(latest['timestamp']),
+        };
+      }
+      return null;
+    });
+  }
+
+  /// Generic stream for historical + real-time sensor data
+  Stream<List<T>> _getSensorDataStream<T>({
+    required String batchId,
+    required String fieldName,
+    required T Function(Map<String, dynamic>) fromMap,
+  }) {
+    if (batchId.isEmpty) return Stream.value([]);
+
+    final todayStr = DateTime.now().toIso8601String().substring(0, 10);
+
+    // 1. Fetch historical data up to yesterday
+    final historicalFuture = _getSensorData(batchId: batchId, fieldName: fieldName).then((list) {
+      // Filter out today's data from historical fetch if any, as the listener handles it
+      return list.where((item) {
+        final ts = item['timestamp'] as DateTime?;
+        if (ts == null) return true;
+        return ts.toIso8601String().substring(0, 10) != todayStr;
+      }).toList();
+    });
+
+    // 2. Listen to today's data
+    final todayStream = _db
+        .collection('batches')
+        .doc(batchId)
+        .collection('readings')
+        .doc(todayStr)
+        .collection('time')
+        .orderBy('timestamp', descending: false)
+        .snapshots();
+
+    // 3. Combine them
+    return Stream.fromFuture(historicalFuture).asyncExpand((historical) {
+      return todayStream.map((snapshot) {
+        final todayReadings = snapshot.docs.map((doc) {
+          final data = doc.data();
+          return {
+            'id': doc.id,
+            'value': (data[fieldName] ?? 0).toDouble(),
+            'timestamp': _parseTimestamp(data['timestamp']),
+          };
+        }).toList();
+
+        final combined = [...historical, ...todayReadings];
+        return combined.map((data) => fromMap(data)).toList();
+      });
+    });
+  }
+
+  @override
+  Stream<List<TemperatureModel>> getTemperatureDataStream(String batchId) {
+    return _getSensorDataStream(
+      batchId: batchId,
+      fieldName: 'temperature',
+      fromMap: (data) => TemperatureModel.fromMap(data),
+    );
+  }
+
+  @override
+  Stream<List<MoistureModel>> getMoistureDataStream(String batchId) {
+    return _getSensorDataStream(
+      batchId: batchId,
+      fieldName: 'moisture',
+      fromMap: (data) => MoistureModel.fromMap(data),
+    );
+  }
+
+  @override
+  Stream<List<OxygenModel>> getOxygenDataStream(String batchId) {
+    return _getSensorDataStream(
+      batchId: batchId,
+      fieldName: 'oxygen',
+      fromMap: (data) => OxygenModel.fromMap(data),
+    );
   }
 }

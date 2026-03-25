@@ -2,7 +2,6 @@ import 'package:flutter_application_1/data/providers/app_user_providers.dart';
 import 'package:flutter_application_1/data/providers/auth_providers.dart';
 import 'package:flutter_application_1/data/providers/core_providers.dart';
 import 'package:flutter_application_1/data/providers/pending_member_providers.dart';
-import 'package:flutter_application_1/data/providers/statistics_providers.dart';
 import 'package:flutter_application_1/data/repositories/team_repository/team_repository.dart';
 import 'package:flutter_application_1/data/repositories/team_repository/team_repository_remote.dart';
 import 'package:flutter_application_1/data/services/api/model/team/team.dart';
@@ -28,7 +27,7 @@ TeamRepository teamRepository(Ref ref) {
     ref.read(teamServiceProvider),
     ref.read(pendingMemberServiceProvider),
     ref.read(appUserServiceProvider),
-		ref.read(firestoreProvider)
+    ref.read(firebaseFirestoreProvider),
   );
 }
 
@@ -42,7 +41,7 @@ PendingMembersService pendingMembersService(Ref ref) {
   return FirebasePendingMembersService(ref.read(firebaseFirestoreProvider));
 }
 
-@riverpod
+@Riverpod(keepAlive: true)
 Future<Team> currentTeam(Ref ref) async {
   final teamUser = ref.watch(appUserProvider).value;
   final teamId = teamUser?.teamId;
@@ -55,10 +54,21 @@ Future<Team> requestTeam(Ref ref) async {
   final teamId = teamUser?.requestTeamId;
   return ref.read(teamServiceProvider).getTeam(teamId!);
 }
+
 // Stream provider to reactively get current user's teamId
 @riverpod
 Stream<String?> currentUserTeamId(Ref ref) async* {
   await for (final user in ref.watch(appUserProvider.future).asStream()) {
     yield user?.teamId;
   }
+}
+
+/// Live member counts by status (active, archived, removed, pending/approval).
+/// Replaces the stale Firestore counter fields which can drift out of sync.
+@riverpod
+Future<Map<String, int>> teamMemberCounts(Ref ref) async {
+  final teamUser = ref.watch(appUserProvider).value;
+  final teamId = teamUser?.teamId;
+  if (teamId == null) return {};
+  return ref.read(teamMemberServiceProvider).fetchMemberCountsByStatus(teamId);
 }

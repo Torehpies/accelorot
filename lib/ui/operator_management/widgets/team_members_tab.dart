@@ -1,29 +1,23 @@
+// lib/ui/operator_management/widgets/team_members_tab.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/data/services/api/model/team_member/team_member.dart';
 import 'package:flutter_application_1/ui/core/constants/spacing.dart';
 import 'package:flutter_application_1/ui/core/themes/web_colors.dart';
 import 'package:flutter_application_1/ui/core/themes/web_text_styles.dart';
-import 'package:flutter_application_1/ui/core/widgets/filters/date_filter_dropdown.dart';
 import 'package:flutter_application_1/ui/core/widgets/filters/filter_dropdown.dart';
-import 'package:flutter_application_1/ui/core/widgets/filters/search_field.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/empty_state.dart';
 import 'package:flutter_application_1/ui/core/widgets/shared/pagination_controls.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_body.dart';
-import 'package:flutter_application_1/ui/core/widgets/table/table_container.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_header.dart';
 import 'package:flutter_application_1/ui/core/widgets/table/table_row.dart';
 import 'package:flutter_application_1/ui/operator_management/models/team_member_filters.dart';
-import 'package:flutter_application_1/ui/operator_management/providers/operators_date_filter_provider.dart';
 import 'package:flutter_application_1/ui/operator_management/view_model/team_members_notifier.dart';
-import 'package:flutter_application_1/ui/operator_management/widgets/add_operator_dialog.dart';
-import 'package:flutter_application_1/ui/operator_management/widgets/tabs_row.dart';
 import 'package:flutter_application_1/ui/operator_management/widgets/team_member_row.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TeamMembersTab extends ConsumerStatefulWidget {
-  final TabController tabController;
-
-  const TeamMembersTab({super.key, required this.tabController});
+  const TeamMembersTab({super.key});
 
   @override
   ConsumerState<TeamMembersTab> createState() => _TeamMembersTabState();
@@ -41,182 +35,146 @@ class _TeamMembersTabState extends ConsumerState<TeamMembersTab>
     final state = ref.watch(teamMembersProvider);
     final notifier = ref.read(teamMembersProvider.notifier);
 
-    final pageCount = state.hasNextPage
-        ? state.currentPage + 2
-        : state.currentPage + 1;
-
-    return BaseTableContainer(
-      // ── Left header: tab switcher ──
-      leftHeaderWidget: TabsRow(
-        controller: widget.tabController,
-        tabTitles: ['Members', 'For Approval'],
-      ),
-
-      // ── Right header: date filter, search, add button ──
-      rightHeaderWidgets: [
-        SizedBox(
-          height: 32,
-          child: DateFilterDropdown(
+    return Column(
+      children: [
+        // ── Table header ──
+        Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: WebColors.tableBorder, width: 1),
+            ),
+          ),
+          child: TableHeader(
             isLoading: state.isLoading,
-            onFilterChanged: (filter) {
-              ref.read(operatorsDateFilterProvider.notifier).setFilter(filter);
-            },
+            columns: [
+              TableCellWidget(
+                flex: 2,
+                child: TableHeaderCell(
+                  label: 'First Name',
+                  sortable: true,
+                  sortColumn: 'firstName',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('firstName'),
+                ),
+              ),
+              TableCellWidget(
+                flex: 2,
+                child: TableHeaderCell(
+                  label: 'Last Name',
+                  sortable: true,
+                  sortColumn: 'lastName',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('lastName'),
+                ),
+              ),
+              TableCellWidget(
+                flex: 3,
+                child: TableHeaderCell(
+                  label: 'Email',
+                  sortable: true,
+                  sortColumn: 'email',
+                  currentSortColumn: state.sortColumn,
+                  sortAscending: state.sortAscending,
+                  onSort: () => notifier.onSort('email'),
+                ),
+              ),
+              TableCellWidget(
+                flex: 1,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Status',
+                        style: WebTextStyles.label.copyWith(
+                          color: state.statusFilter != TeamMemberStatusFilter.all
+                              ? WebColors.greenAccent
+                              : WebColors.textLabel,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      FilterDropdown<TeamMemberStatusFilter>(
+                        label: 'Status',
+                        value: state.statusFilter,
+                        items: TeamMemberStatusFilter.values,
+                        displayName: (filter) => filter.displayName,
+                        onChanged: (filter) => notifier.setStatusFilter(filter),
+                        isLoading: state.isLoading,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const TableCellWidget(
+                flex: 1,
+                child: TableHeaderCell(label: 'Actions'),
+              ),
+            ],
           ),
         ),
-        SearchField(
-          isLoading: state.isLoading,
-          onChanged: (query) => notifier.setSearch(query),
-        ),
-        Tooltip(
-          message: 'Add Operator',
-          child: ElevatedButton.icon(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) => AddOperatorDialog(),
-              );
-            },
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Add Operator'),
-            style: ElevatedButton.styleFrom(
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+
+        // ── Table body ──
+        Expanded(
+          child: TableBody<TeamMember>(
+            items: state.paginatedMembers,
+            isLoading: state.isLoading && state.allMembers.isEmpty,
+            emptyStateWidget: const EmptyState(
+              title: 'No members found',
+              subtitle: 'Try adjusting your filters or search',
+              icon: Icons.person_search,
             ),
+            rowBuilder: (member) =>
+                TeamMemberRow(member: member, notifier: notifier),
+            skeletonRowBuilder: _buildSkeletonRow,
+          ),
+        ),
+
+        // ── Pagination ──
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.tableCellHorizontal,
+            vertical: AppSpacing.lg,
+          ),
+          child: PaginationControls(
+            currentPage: state.currentPage + 1,
+            totalPages: state.totalPages,
+            itemsPerPage: state.itemsPerPage,
+            isLoading: state.isLoading,
+            onPageChanged: (page) => notifier.onPageChanged(page - 1),
+            onItemsPerPageChanged: notifier.onItemsPerPageChanged,
           ),
         ),
       ],
-
-      // ── Table header: sortable columns ──
-      tableHeader: TableHeader(
-        isLoading: state.isLoading,
-        columns: [
-          TableCellWidget(
-            flex: 2,
-            child: TableHeaderCell(
-              label: 'First Name',
-              sortable: true,
-              sortColumn: 'firstName',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('firstName'),
-            ),
-          ),
-          TableCellWidget(
-            flex: 2,
-            child: TableHeaderCell(
-              label: 'Last Name',
-              sortable: true,
-              sortColumn: 'lastName',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('lastName'),
-            ),
-          ),
-          TableCellWidget(
-            flex: 3,
-            child: TableHeaderCell(
-              label: 'Email',
-              sortable: true,
-              sortColumn: 'email',
-              currentSortColumn: state.sortColumn,
-              sortAscending: state.sortAscending,
-              onSort: () => notifier.onSort('email'),
-            ),
-          ),
-          TableCellWidget(
-            flex: 1,
-            child: SizedBox(
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Status',
-                      style: WebTextStyles.label.copyWith(
-                        color: state.statusFilter != TeamMemberStatusFilter.all
-                            ? WebColors.greenAccent
-                            : WebColors.textLabel,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    FilterDropdown<TeamMemberStatusFilter>(
-                      label: 'Status',
-                      value: state.statusFilter,
-                      items: TeamMemberStatusFilter.values,
-                      displayName: (filter) => filter.displayName,
-                      onChanged: (filter) => notifier.setStatusFilter(filter),
-                      isLoading: state.isLoading,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          TableCellWidget(
-            flex: 1,
-            child: const TableHeaderCell(label: 'Actions'),
-          ),
-        ],
-      ),
-
-      // ── Table body: rows + skeleton + empty state ──
-      tableBody: TableBody<TeamMember>(
-        items: state.filteredMembers,
-        isLoading: state.isLoading && state.members.isEmpty,
-        emptyStateWidget: const EmptyState(
-          title: 'No members found',
-          subtitle: 'Try adjusting your filters or search',
-          icon: Icons.person_search,
-        ),
-        rowBuilder: (member) =>
-            TeamMemberRow(member: member, notifier: notifier),
-        skeletonRowBuilder: () => _buildSkeletonRow(),
-      ),
-
-      // ── Pagination ──
-      paginationWidget: PaginationControls(
-        currentPage: state.currentPage + 1,
-        totalPages: pageCount,
-        itemsPerPage: state.pageSize,
-        isLoading: state.isLoading,
-        onPageChanged: (page) => notifier.goToPage(page - 1),
-        onItemsPerPageChanged: notifier.setPageSize,
-      ),
     );
   }
 }
 
-// ── Skeleton row matching [2, 2, 3, 1, 1] column layout ──
+// ── Skeleton row: [2, 2, 3, 1, 1] ──
+
 Widget _buildSkeletonRow() {
   return GenericTableRow(
     cellSpacing: AppSpacing.md,
     cells: [
-      // First Name
       TableCellWidget(
         flex: 2,
         child: Center(child: _SkeletonBox(width: 100, height: 16)),
       ),
-      // Last Name
       TableCellWidget(
         flex: 2,
         child: Center(child: _SkeletonBox(width: 100, height: 16)),
       ),
-      // Email
       TableCellWidget(
         flex: 3,
         child: Center(child: _SkeletonBox(width: 180, height: 16)),
       ),
-      // Status badge shape
       TableCellWidget(
         flex: 1,
         child: Center(
           child: _SkeletonBox(width: 70, height: 24, borderRadius: 5),
         ),
       ),
-      // Action icons
       TableCellWidget(
         flex: 1,
         child: Center(
@@ -234,7 +192,8 @@ Widget _buildSkeletonRow() {
   );
 }
 
-/// Simple pulsing skeleton box — matches the animation pattern used across the app
+// ── Pulsing skeleton box ──
+
 class _SkeletonBox extends StatefulWidget {
   final double width;
   final double height;

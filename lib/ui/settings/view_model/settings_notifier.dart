@@ -6,7 +6,7 @@ import 'settings_state.dart';
 
 part 'settings_notifier.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 class SettingsNotifier extends _$SettingsNotifier {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;

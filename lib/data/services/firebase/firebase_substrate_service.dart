@@ -29,7 +29,10 @@ class FirestoreSubstrateService implements SubstrateService {
   // ===== FETCH OPERATIONS =====
 
   @override
-  Future<List<Substrate>> fetchTeamSubstrates() async {
+  Future<List<Substrate>> fetchTeamSubstrates({
+    int? limit,
+    DateTime? cutoffDate,
+  }) async {
     if (currentUserId == null) {
       throw Exception('User not authenticated');
     }
@@ -45,10 +48,15 @@ class FirestoreSubstrateService implements SubstrateService {
       }
 
       // Fetch team-wide substrates
-      final allSubstrates = await _fetchTeamSubstrates(teamId);
+      var allSubstrates = await _fetchTeamSubstrates(teamId, limit: limit, cutoffDate: cutoffDate);
 
       // Sort by timestamp descending (newest first)
       allSubstrates.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      // Apply upper bound total limit
+      if (limit != null && allSubstrates.length > limit) {
+        allSubstrates = allSubstrates.sublist(0, limit);
+      }
 
       debugPrint('✅ Fetched ${allSubstrates.length} substrates');
       return allSubstrates;
@@ -59,10 +67,12 @@ class FirestoreSubstrateService implements SubstrateService {
   }
 
   /// Fetch substrates for team users (multi-step query)
-  Future<List<Substrate>> _fetchTeamSubstrates(String teamId) async {
-    final List<Substrate> allSubstrates = [];
-    int successCount = 0;
-    int failureCount = 0;
+  Future<List<Substrate>> _fetchTeamSubstrates(
+    String teamId, {
+    int? limit,
+    DateTime? cutoffDate,
+  }) async {
+
 
     // Get all machines belonging to this team
     final teamMachineIds = await _batchService.getTeamMachineIds(teamId);
@@ -72,53 +82,44 @@ class FirestoreSubstrateService implements SubstrateService {
       return [];
     }
 
-    // Get all batches for those machines
-    final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+    final List<Substrate> allSubstrates = [];
+    final List<Future<QuerySnapshot>> chunkFutures = [];
 
-    if (batches.isEmpty) {
-      debugPrint('ℹ️ No batches found for team machines');
+    // Split teamMachineIds into chunks of 10 (Firestore whereIn limit)
+    for (int i = 0; i < teamMachineIds.length; i += 10) {
+      final chunk = teamMachineIds.skip(i).take(10).toList();
+      var query = _firestore
+          .collectionGroup('substrates')
+          .where('machineId', whereIn: chunk);
+
+      if (cutoffDate != null) {
+        query = query.where(
+          'timestamp',
+          isGreaterThanOrEqualTo: Timestamp.fromDate(cutoffDate),
+        );
+      }
+
+      chunkFutures.add(query.get());
+    }
+
+    try {
+      final results = await Future.wait(chunkFutures);
+
+      for (var snapshot in results) {
+        allSubstrates.addAll(
+          snapshot.docs.map((doc) => Substrate.fromFirestore(doc)),
+        );
+      }
+
+      // Sort globally descending
+      allSubstrates.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+      return allSubstrates;
+    } catch (e) {
+      debugPrint('⚠️ Error fetching chunked substrates: $e');
       return [];
     }
 
-    // Fetch substrates from each batch's subcollection in parallel
-    final futures = batches.map((batchDoc) async {
-      try {
-        // PATH: batches/{batchId}/substrates
-        final substratesSnapshot = await _firestore
-            .collection('batches')
-            .doc(batchDoc.id)
-            .collection('substrates')
-            .orderBy('timestamp', descending: true)
-            .get();
-
-        final substrates = substratesSnapshot.docs
-            .map((doc) => Substrate.fromFirestore(doc))
-            .toList();
-
-        return {'success': true, 'substrates': substrates};
-      } catch (e) {
-        debugPrint(
-          '⚠️ Error fetching substrates from batch ${batchDoc.id}: $e',
-        );
-        return {'success': false, 'substrates': <Substrate>[]};
-      }
-    });
-
-    final results = await Future.wait(futures);
-
-    for (var result in results) {
-      if (result['success'] as bool) {
-        allSubstrates.addAll(result['substrates'] as List<Substrate>);
-        successCount++;
-      } else {
-        failureCount++;
-      }
-    }
-
-    debugPrint(
-      '📊 Fetched substrates from $successCount/${batches.length} batches ($failureCount failures)',
-    );
-    return allSubstrates;
   }
 
   // ===== CREATE OPERATIONS =====
@@ -407,3 +408,4 @@ class FirestoreSubstrateService implements SubstrateService {
         .set({'label': additive}, SetOptions(merge: true));
   }
 }
+

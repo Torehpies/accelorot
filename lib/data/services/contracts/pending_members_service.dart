@@ -9,15 +9,23 @@ abstract class PendingMembersService {
     required int pageIndex,
     DateFilterRange? dateFilter,
   });
-  Future<Result> addPendingMember({
+
+  Future<Result<List<PendingMember>>> getAllPendingMembers({
+    required String teamId,
+    DateFilterRange? dateFilter,
+  });
+
+  Future<Result<void>> addPendingMember({
     required String teamId,
     required PendingMember pendingMember,
   });
-  Future<Result> acceptPendingMember({
+
+  Future<Result<void>> acceptPendingMember({
     required String teamId,
     required PendingMember member,
   });
-  Future<Result> deletePendingMember({
+
+  Future<Result<void>> deletePendingMember({
     required String teamId,
     required String docId,
   });

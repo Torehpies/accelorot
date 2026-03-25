@@ -1,5 +1,3 @@
-// ignore_for_file: avoid_public_notifier_properties
-
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../data/models/activity_log_item.dart';
 import '../models/activity_list_state.dart';
@@ -73,6 +71,7 @@ class ActivityViewModel extends _$ActivityViewModel {
 
   // ===== CONFIGURATION GETTERS =====
 
+  // ignore: avoid_public_notifier_properties
   String get screenTitle => _config.getTitle(machineId: state.focusedMachineId);
   List<String> get filters => _config.filters;
 
@@ -106,8 +105,8 @@ class ActivityViewModel extends _$ActivityViewModel {
         return await _aggregator.getCyclesRecom(cutoffDate: cutoffDate);
 
       case ActivityScreenType.allActivity:
-        // Use the new caching method for allActivity screen
-        final result = await _aggregator.getAllActivitiesWithCache();
+        // Applying identical limits to the viewmodel to block 22s fetches on the Activity screen
+        final result = await _aggregator.getAllActivitiesWithCache(limit: 50, filterRecentDays: 7);
         _entityCache = result.entityCache; // Store cache
         return result.items;
     }

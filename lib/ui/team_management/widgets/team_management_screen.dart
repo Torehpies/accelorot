@@ -3,7 +3,7 @@ import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 import 'package:flutter_application_1/ui/core/ui/app_snackbar.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/add_team_notifier.dart';
 import 'package:flutter_application_1/ui/team_management/view_model/team_management_notifier.dart';
-import 'package:flutter_application_1/ui/team_management/widgets/add_team_dialog.dart';
+import 'package:flutter_application_1/ui/team_management/dialogs/add_team_dialog.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/desktop_team_management_view.dart';
 import 'package:flutter_application_1/ui/team_management/widgets/mobile_team_management_view.dart';
 import 'package:flutter_application_1/ui/core/ui/responsive_layout.dart';

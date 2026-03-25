@@ -54,42 +54,45 @@ class FirestoreAlertService implements AlertService {
       }
 
       // 2. Get all batches for these machines
-      final batches = await _batchService.getBatchesForMachines(teamMachineIds);
+      final batches = await _batchService.getBatchesForMachines(
+        teamMachineIds,
+        cutoffDate: cutoffDate,
+      );
 
       if (batches.isEmpty) {
         return [];
       }
 
       final List<Alert> allAlerts = [];
+      const int chunkSize = 6;
 
-      // 3. Parallel Fetch: Process all batches concurrently
-      // Use efficient Future.wait with type-safe results list
-      final List<List<Alert>> results = await Future.wait(
-        batches.map((batchDoc) async {
-          try {
-            final data = batchDoc.data() as Map<String, dynamic>;
-            final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
-            final completedAt = (data['completedAt'] as Timestamp?)?.toDate();
-            final machineId = data['machineId'] as String?;
+      for (int i = 0; i < batches.length; i += chunkSize) {
+        final chunk = batches.skip(i).take(chunkSize);
+        final List<List<Alert>> results = await Future.wait(
+          chunk.map((batchDoc) async {
+            try {
+              final data = batchDoc.data() as Map<String, dynamic>;
+              final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
+              final completedAt = (data['completedAt'] as Timestamp?)?.toDate();
+              final machineId = data['machineId'] as String?;
 
-            // ✅ NEW: Pass cutoffDate to fetchAlertsForBatch
-            return await fetchAlertsForBatch(
-              batchDoc.id,
-              start: createdAt,
-              end: completedAt,
-              machineId: machineId,
-              cutoffDate: cutoffDate, // Apply cutoff at date path level
-            );
-          } catch (e) {
-            debugPrint('⚠️ Error fetching alerts for batch ${batchDoc.id}: $e');
-            return <Alert>[];
-          }
-        }),
-      );
+              return await fetchAlertsForBatch(
+                batchDoc.id,
+                start: createdAt,
+                end: completedAt,
+                machineId: machineId,
+                cutoffDate: cutoffDate,
+              );
+            } catch (e) {
+              debugPrint('⚠️ Error fetching alerts for batch ${batchDoc.id}: $e');
+              return <Alert>[];
+            }
+          }),
+        );
 
-      // Flatten results
-      for (var batchAlerts in results) {
-        allAlerts.addAll(batchAlerts);
+        for (var batchAlerts in results) {
+          allAlerts.addAll(batchAlerts);
+        }
       }
 
       // Sort by timestamp descending (newest first)
