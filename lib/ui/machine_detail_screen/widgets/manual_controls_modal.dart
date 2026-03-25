@@ -157,7 +157,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     _drumRunning = false;
     _drumStartTime = null;
     _drumAccumulatedSeconds = 0;
-    _drumUptime = '00:00:00';
+    _drumUptime = '00:00';
   }
 
   void _resetAeratorState() {
@@ -165,7 +165,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     _aeratorRunning = false;
     _aeratorStartTime = null;
     _aeratorAccumulatedSeconds = 0;
-    _aeratorUptime = '00:00:00';
+    _aeratorUptime = '00:00';
   }
 
   void _startDrumTimer() {
@@ -194,10 +194,9 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$hours:$minutes:$seconds';
+    return '$minutes:$seconds';
   }
 
   Future<void> _toggleDrum() async {

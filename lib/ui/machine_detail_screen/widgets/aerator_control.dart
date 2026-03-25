@@ -17,7 +17,7 @@ class AeratorControl extends ConsumerStatefulWidget {
 
 class _AeratorControlState extends ConsumerState<AeratorControl> {
   Timer? _timer;
-  String _uptime = '00:00:00';
+  String _uptime = '00:00';
   bool _isLoading = false;
   
   // State from Firestore
@@ -103,7 +103,7 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
         _isRunning = false;
         _startTime = null;
         _accumulatedSeconds = 0;
-        _uptime = '00:00:00';
+        _uptime = '00:00';
       });
     }
   }
@@ -122,10 +122,9 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    return '$hours:$minutes:$seconds';
+    return '$minutes:$seconds';
   }
 
   Future<void> _toggleAerator() async {
@@ -169,7 +168,7 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
           _isRunning = false;
           _startTime = null;
           _accumulatedSeconds = 0; 
-          _uptime = '00:00:00';
+          _uptime = '00:00';
         });
         
         if (mounted) {

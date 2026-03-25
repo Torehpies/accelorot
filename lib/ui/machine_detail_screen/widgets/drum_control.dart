@@ -17,7 +17,7 @@ class DrumControl extends ConsumerStatefulWidget {
 
 class _DrumControlState extends ConsumerState<DrumControl> {
   Timer? _timer;
-  String _uptime = '00:00:00';
+  String _uptime = '00:00';
   bool _isLoading = false;
   
   // State from Firestore
@@ -104,7 +104,7 @@ class _DrumControlState extends ConsumerState<DrumControl> {
         _isRunning = false;
         _startTime = null;
         _accumulatedSeconds = 0;
-        _uptime = '00:00:00';
+        _uptime = '00:00';
       });
     }
   }
@@ -123,12 +123,9 @@ class _DrumControlState extends ConsumerState<DrumControl> {
 
   String _formatDuration(Duration duration) {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
-    final hours = twoDigits(duration.inHours);
-    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final minutes = twoDigits(duration.inMinutes);
     final seconds = twoDigits(duration.inSeconds.remainder(60));
-    // The design shows HH:MM format usually, but we can stick to HH:MM:SS if precision is requested.
-    // Standardizing to HH:MM based on original ControlCard placeholder '00:00'
-    return '$hours:$minutes:$seconds';
+    return '$minutes:$seconds';
   }
 
   Future<void> _toggleDrum() async {
@@ -174,7 +171,7 @@ class _DrumControlState extends ConsumerState<DrumControl> {
           // We keep total accumulated to show what was ran until a new restart zeroes it out in _loadState,
           // though for visual clean slate we can zero it here. Let's zero it for a true 'stop/reset' feel.
           _accumulatedSeconds = 0; 
-          _uptime = '00:00:00';
+          _uptime = '00:00';
         });
         
         if (mounted) {
