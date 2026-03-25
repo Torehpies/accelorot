@@ -19,6 +19,7 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
   Timer? _timer;
   String _uptime = '00:00';
   bool _isLoading = false;
+  bool? _intendedState; // Tracks what state we are waiting for
   
   // State from Firestore
   bool _isRunning = false;
@@ -59,6 +60,17 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
       final cycle = cycles.isEmpty ? null : cycles.first;
       
       if (!mounted) return;
+
+      setState(() {
+        if (_intendedState != null) {
+          if (widget.machine.aeratorActive == _intendedState!) {
+            _isLoading = false;
+            _intendedState = null;
+          }
+        } else {
+          _isLoading = false;
+        }
+      });
 
       if (widget.machine.aeratorActive) {
         // It's actively running (database status)
@@ -146,7 +158,11 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _intendedState = !_isRunning;
+    });
+    
     final cycleRepo = ref.read(cycleRepositoryProvider);
 
     try {
@@ -164,12 +180,6 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
         );
 
         _timer?.cancel();
-        setState(() {
-          _isRunning = false;
-          _startTime = null;
-          _accumulatedSeconds = 0; 
-          _uptime = '00:00';
-        });
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -194,12 +204,14 @@ class _AeratorControlState extends ConsumerState<AeratorControl> {
       }
     } catch (e) {
       if (mounted) {
+        setState(() {
+          _isLoading = false; // Clear loading on error
+          _intendedState = null;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to toggle Aerator: $e'), backgroundColor: Colors.red),
         );
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 

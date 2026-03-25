@@ -19,6 +19,7 @@ class _DrumControlState extends ConsumerState<DrumControl> {
   Timer? _timer;
   String _uptime = '00:00';
   bool _isLoading = false;
+  bool? _intendedState; // Tracks what state we are waiting for
   
   // State from Firestore
   bool _isRunning = false;
@@ -59,6 +60,17 @@ class _DrumControlState extends ConsumerState<DrumControl> {
       final cycle = cycles.isEmpty ? null : cycles.first;
       
       if (!mounted) return;
+
+      setState(() {
+        if (_intendedState != null) {
+          if (widget.machine.drumActive == _intendedState!) {
+            _isLoading = false;
+            _intendedState = null;
+          }
+        } else {
+          _isLoading = false;
+        }
+      });
 
       if (widget.machine.drumActive) {
         // It's actively running (database status)
@@ -147,7 +159,11 @@ class _DrumControlState extends ConsumerState<DrumControl> {
       return;
     }
 
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+      _intendedState = !_isRunning;
+    });
+    
     final cycleRepo = ref.read(cycleRepositoryProvider);
 
     try {
@@ -165,14 +181,6 @@ class _DrumControlState extends ConsumerState<DrumControl> {
         );
 
         _timer?.cancel();
-        setState(() {
-          _isRunning = false;
-          _startTime = null;
-          // We keep total accumulated to show what was ran until a new restart zeroes it out in _loadState,
-          // though for visual clean slate we can zero it here. Let's zero it for a true 'stop/reset' feel.
-          _accumulatedSeconds = 0; 
-          _uptime = '00:00';
-        });
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -197,12 +205,14 @@ class _DrumControlState extends ConsumerState<DrumControl> {
       }
     } catch (e) {
       if (mounted) {
+        setState(() {
+          _isLoading = false; // Clear loading on error
+          _intendedState = null;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to toggle Drum: $e'), backgroundColor: Colors.red),
         );
       }
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 

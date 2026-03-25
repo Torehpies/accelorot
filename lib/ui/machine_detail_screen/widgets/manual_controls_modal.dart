@@ -21,6 +21,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
   String _drumUptime = '00:00';
   bool _drumLoading = false;
   bool _drumRunning = false;
+  bool? _intendedDrumState;
   DateTime? _drumStartTime;
   int _drumAccumulatedSeconds = 0;
 
@@ -29,6 +30,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
   String _aeratorUptime = '00:00';
   bool _aeratorLoading = false;
   bool _aeratorRunning = false;
+  bool? _intendedAeratorState;
   DateTime? _aeratorStartTime;
   int _aeratorAccumulatedSeconds = 0;
 
@@ -56,8 +58,6 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
   }
 
   Future<void> _loadStates() async {
-    if (_drumLoading || _aeratorLoading) return;
-
     try {
       final liveMachine = ref.read(machineStreamProvider(widget.machine.machineId)).value ?? widget.machine;
       final batchId = liveMachine.currentBatchId;
@@ -78,6 +78,27 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       });
       final drumCycle = drumCycles.isEmpty ? null : drumCycles.first;
       
+      // Apply intent tracking for loading states
+      setState(() {
+        if (_intendedDrumState != null) {
+          if (liveMachine.drumActive == _intendedDrumState!) {
+            _drumLoading = false;
+            _intendedDrumState = null;
+          }
+        } else {
+          _drumLoading = false;
+        }
+
+        if (_intendedAeratorState != null) {
+          if (liveMachine.aeratorActive == _intendedAeratorState!) {
+            _aeratorLoading = false;
+            _intendedAeratorState = null;
+          }
+        } else {
+          _aeratorLoading = false;
+        }
+      });
+
       if (liveMachine.drumActive) {
         // Start/Continue timer based on machine activity
         if (!_drumRunning) {
@@ -206,7 +227,10 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    setState(() => _drumLoading = true);
+    setState(() {
+      _drumLoading = true;
+      _intendedDrumState = !_drumRunning;
+    });
     final cycleRepo = ref.read(cycleRepositoryProvider);
 
     try {
@@ -218,6 +242,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
           totalRuntimeSeconds: _drumAccumulatedSeconds + elapsed,
           expectedStatus: 'running',
         );
+        _drumTimer?.cancel();
       } else {
         await cycleRepo.startDrumController(
           batchId: batchId,
@@ -229,8 +254,12 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       }
     } catch (e) {
       debugPrint('Error toggling drum: $e');
-    } finally {
-      if (mounted) setState(() => _drumLoading = false);
+      if (mounted) {
+        setState(() {
+          _drumLoading = false;
+          _intendedDrumState = null;
+        });
+      }
     }
   }
 
@@ -241,7 +270,10 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    setState(() => _aeratorLoading = true);
+    setState(() {
+      _aeratorLoading = true;
+      _intendedAeratorState = !_aeratorRunning;
+    });
     final cycleRepo = ref.read(cycleRepositoryProvider);
 
     try {
@@ -253,6 +285,7 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
           totalRuntimeSeconds: _aeratorAccumulatedSeconds + elapsed,
           expectedStatus: 'running',
         );
+        _aeratorTimer?.cancel();
       } else {
         await cycleRepo.startAerator(
           batchId: batchId,
@@ -264,8 +297,12 @@ class _ManualControlsModalState extends ConsumerState<ManualControlsModal> {
       }
     } catch (e) {
       debugPrint('Error toggling aerator: $e');
-    } finally {
-      if (mounted) setState(() => _aeratorLoading = false);
+      if (mounted) {
+        setState(() {
+          _aeratorLoading = false;
+          _intendedAeratorState = null;
+        });
+      }
     }
   }
 
