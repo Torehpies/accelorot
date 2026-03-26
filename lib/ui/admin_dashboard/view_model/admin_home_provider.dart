@@ -167,7 +167,7 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
       }
 
       // Load collections concurrently instead of sequentially to drastically reduce dashboard load time
-      final sw = Stopwatch()..start();
+      // final sw = Stopwatch()..start();
       final results = await Future.wait([
         ref.read(operatorRepositoryProvider).getOperators(teamId),
         ref.read(machineRepositoryProvider).getMachinesByTeam(teamId),
@@ -207,7 +207,7 @@ class AdminHomeNotifier extends AsyncNotifier<AdminHomeState> {
       }
 
       // Load collections concurrently here too
-      final sw = Stopwatch()..start();
+      // final sw = Stopwatch()..start();
       final results = await Future.wait([
         ref.read(operatorRepositoryProvider).getOperators(teamId),
         ref.read(machineRepositoryProvider).getMachinesByTeam(teamId),

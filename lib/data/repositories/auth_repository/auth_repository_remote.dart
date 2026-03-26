@@ -24,6 +24,7 @@ class AuthRepositoryRemote implements AuthRepository {
   final AppUserService _userService;
   final GoogleSignIn _googleSignIn;
   final TeamService _teamService;
+  // ignore: unused_field
   final PushNotificationService _pushNotificationService;
 
   AppUser? _lastKnownUser;

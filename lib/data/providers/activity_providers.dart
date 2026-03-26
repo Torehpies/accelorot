@@ -29,7 +29,7 @@ final activityAggregatorProvider = Provider<ActivityAggregatorService>((ref) {
 
   // Clear memory cache when user logs out or switches accounts
   ref.listen(authStateChangesProvider, (previous, next) {
-    if (previous?.value?.uid != next?.value?.uid) {
+    if (previous?.value?.uid != next.value?.uid) {
       service.clearCache();
     }
   });
