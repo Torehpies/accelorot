@@ -105,7 +105,7 @@ class BaseTableContainer extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          if (leftHeaderWidget != null) leftHeaderWidget!,
+          ?leftHeaderWidget,
           if (leftHeaderWidget != null && rightHeaderWidgets != null)
             const Spacer(),
           if (rightHeaderWidgets != null)
