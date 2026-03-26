@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/providers/machine_providers.dart';
 import '../../../../data/models/machine_model.dart';
-import '../../../../services/sess_service.dart';
 import 'web_dropdown.dart';
 import 'web_table_container.dart';
 
@@ -24,16 +23,17 @@ class WebMachineSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final sessionService = SessionService();
+    // Use a one-time future fetch instead of a real-time stream.
+    // This prevents the dropdown from flickering every time real-time
+    // Firestore streams update the parent widget tree.
+    final machinesAsync = ref.watch(userTeamMachinesProvider);
 
-    return FutureBuilder<Map<String, dynamic>?>(
-      future: sessionService.getCurrentUserData(),
-      builder: (context, userSnapshot) {
-        final shouldShowLoading =
-            userSnapshot.connectionState == ConnectionState.waiting ||
-            isLoading;
+    return machinesAsync.when(
+      data: (machines) {
+        final activeMachines =
+            machines.where((m) => !m.isArchived).toList();
 
-        if (userSnapshot.connectionState == ConnectionState.waiting) {
+        if (activeMachines.isEmpty) {
           return WebDropdown<String>(
             value: null,
             label: 'Machine',
@@ -41,86 +41,47 @@ class WebMachineSelector extends ConsumerWidget {
             items: const [],
             onChanged: (_) {},
             icon: Icons.precision_manufacturing,
-            isLoading: true,
+            disabledHint: 'No Machines',
             displayMode: displayMode,
+            isLoading: isLoading,
           );
         }
 
-        final userData = userSnapshot.data;
-        final teamId = userData?['teamId'] as String?;
+        final selectedMachine =
+            activeMachines.any((m) => m.id == selectedMachineId)
+            ? activeMachines.firstWhere((m) => m.id == selectedMachineId)
+            : null;
 
-        if (teamId == null) {
-          return WebDropdown<String>(
-            value: null,
-            label: 'Machine',
-            hintText: 'All Machines',
-            items: const [],
-            onChanged: (_) {},
-            icon: Icons.precision_manufacturing,
-            disabledHint: 'No Team Found',
-            displayMode: displayMode,
-          );
-        }
-
-        final machinesAsync = ref.watch(machinesStreamProvider(teamId));
-
-        return machinesAsync.when(
-          data: (machines) {
-            final activeMachines = machines
-                .where((m) => !m.isArchived)
-                .toList();
-
-            if (activeMachines.isEmpty) {
-              return WebDropdown<String>(
-                value: null,
-                label: 'Machine',
-                hintText: 'All Machines',
-                items: const [],
-                onChanged: (_) {},
-                icon: Icons.precision_manufacturing,
-                disabledHint: 'No Machines',
-                displayMode: displayMode,
-                isLoading: shouldShowLoading,
-              );
-            }
-
-            final selectedMachine =
-                activeMachines.any((m) => m.id == selectedMachineId)
-                ? activeMachines.firstWhere((m) => m.id == selectedMachineId)
-                : null;
-
-            return _WebMachineDropdownInner(
-              selectedMachineId: selectedMachineId,
-              selectedMachineName:
-                  selectedMachine?.machineName ?? 'All Machines',
-              activeMachines: activeMachines,
-              onChanged: onChanged,
-              displayMode: displayMode,
-              isLoading: shouldShowLoading,
-            );
-          },
-          loading: () => WebDropdown<String>(
-            value: null,
-            label: 'Machine',
-            hintText: 'All Machines',
-            items: const [],
-            onChanged: (_) {},
-            icon: Icons.precision_manufacturing,
-            isLoading: true,
-            displayMode: displayMode,
-          ),
-          error: (_, _) => WebDropdown<String>(
-            value: null,
-            label: 'Machine',
-            hintText: 'All Machines',
-            items: const [],
-            onChanged: (_) {},
-            icon: Icons.precision_manufacturing,
-            disabledHint: 'Error loading',
-            displayMode: displayMode,
-          ),
+        return _WebMachineDropdownInner(
+          selectedMachineId: selectedMachineId,
+          selectedMachineName:
+              selectedMachine?.machineName ?? 'All Machines',
+          activeMachines: activeMachines,
+          onChanged: onChanged,
+          displayMode: displayMode,
+          isLoading: isLoading,
         );
       },
+      loading: () => WebDropdown<String>(
+        value: null,
+        label: 'Machine',
+        hintText: 'All Machines',
+        items: const [],
+        onChanged: (_) {},
+        icon: Icons.precision_manufacturing,
+        isLoading: true,
+        displayMode: displayMode,
+      ),
+      error: (_, _) => WebDropdown<String>(
+        value: null,
+        label: 'Machine',
+        hintText: 'All Machines',
+        items: const [],
+        onChanged: (_) {},
+        icon: Icons.precision_manufacturing,
+        disabledHint: 'Error loading',
+        displayMode: displayMode,
+      ),
     );
   }
 }

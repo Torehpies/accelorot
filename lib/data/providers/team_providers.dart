@@ -55,12 +55,12 @@ Future<Team> requestTeam(Ref ref) async {
   return ref.read(teamServiceProvider).getTeam(teamId!);
 }
 
-// Stream provider to reactively get current user's teamId
+// Provider to reactively get current user's teamId
 @riverpod
-Stream<String?> currentUserTeamId(Ref ref) async* {
-  await for (final user in ref.watch(appUserProvider.future).asStream()) {
-    yield user?.teamId;
-  }
+String? currentUserTeamId(Ref ref) {
+  // Directly extract teamId from the appUser value state without recreating Stream Futures.
+  // This completely eliminates any "Loading" status flickering when the user sync stream pings.
+  return ref.watch(appUserProvider).value?.teamId;
 }
 
 /// Live member counts by status (active, archived, removed, pending/approval).

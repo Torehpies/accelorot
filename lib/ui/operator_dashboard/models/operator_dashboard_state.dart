@@ -37,7 +37,8 @@ abstract class OperatorDashboardState with _$OperatorDashboardState {
   const factory OperatorDashboardState({
     // Filters
     @Default(DrumStatusFilter.all) DrumStatusFilter selectedDrumFilter,
-    @Default(DateFilterRange(type: DateFilterType.none)) DateFilterRange dateFilter,
+    @Default(DateFilterRange(type: DateFilterType.none))
+    DateFilterRange dateFilter,
     @Default('') String searchQuery,
 
     // Sorting (optional for mobile)
@@ -65,9 +66,9 @@ abstract class OperatorDashboardState with _$OperatorDashboardState {
     final filterService = MachineFilterService();
 
     // 1. Base filter: Strictly active and non-archived machines
-    final activeMachines = machines.where((m) => 
-      m.status == MachineStatus.active && !m.isArchived
-    ).toList();
+    final activeMachines = machines
+        .where((m) => m.status == MachineStatus.active && !m.isArchived)
+        .toList();
 
     // 2. Apply text and date search
     final result = filterService.applyAllFilters(
@@ -78,11 +79,11 @@ abstract class OperatorDashboardState with _$OperatorDashboardState {
       sortColumn: selectedSort,
       sortAscending: false,
     );
-    
+
     // 3. Apply custom Drum Status filter
-    // Note: Alert state is dynamic/async, so filtering by 'Alert' relies on 
-    // basic heuristics here if we don't have synchronous readings. 
-    // Ideally, the View will handle showing Alert vs Running. 
+    // Note: Alert state is dynamic/async, so filtering by 'Alert' relies on
+    // basic heuristics here if we don't have synchronous readings.
+    // Ideally, the View will handle showing Alert vs Running.
     // For now, if 'Alert' is selected, we show machines with active batches to let the UI resolve it,
     // or we could filter purely synchronously:
     var finalMachines = result.filteredMachines;
@@ -90,26 +91,47 @@ abstract class OperatorDashboardState with _$OperatorDashboardState {
       case DrumStatusFilter.all:
         break; // no extra filtering
       case DrumStatusFilter.empty:
-        finalMachines = finalMachines.where((m) => m.currentBatchId == null).toList();
+        finalMachines = finalMachines
+            .where((m) => m.currentBatchId == null)
+            .toList();
         break;
       case DrumStatusFilter.running:
-        finalMachines = finalMachines.where((m) => m.currentBatchId != null && m.drumActive).toList();
+        finalMachines = finalMachines
+            .where((m) => m.currentBatchId != null && m.drumActive)
+            .toList();
         break;
       case DrumStatusFilter.rest:
-        finalMachines = finalMachines.where((m) => m.currentBatchId != null && !m.drumActive).toList();
+        finalMachines = finalMachines
+            .where((m) => m.currentBatchId != null && !m.drumActive)
+            .toList();
         break;
       case DrumStatusFilter.alert:
         // Since Alert is calculated asynchronously in the UI based on live sensor streams,
-        // we conservatively return all machines with active batches to the UI, 
-        // OR we'd need to sync readings in the state. 
-        // To accurately filter without fetching streams for all 100 machines, 
+        // we conservatively return all machines with active batches to the UI,
+        // OR we'd need to sync readings in the state.
+        // To accurately filter without fetching streams for all 100 machines,
         // we'll pass machines with batches down and let the custom filter widget handle it later if needed.
         // For strict offline filtering, we just check if it has a batch for now.
-        finalMachines = finalMachines.where((m) => m.currentBatchId != null).toList();
+        finalMachines = finalMachines
+            .where((m) => m.currentBatchId != null)
+            .toList();
         break;
     }
 
-    return finalMachines;
+    // 4. Force active (non-empty) machines to the top
+    final sortedList = finalMachines.toList();
+    sortedList.sort((a, b) {
+      final aActive = a.currentBatchId != null;
+      final bActive = b.currentBatchId != null;
+
+      if (aActive && !bActive) return -1;
+      if (!aActive && bActive) return 1;
+
+      // If both are active or both are empty, maintain their existing sort order
+      return 0;
+    });
+
+    return sortedList;
   }
 
   /// Check if has any active filters
