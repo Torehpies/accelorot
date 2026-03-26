@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/activity_log_item.dart';
-import '../../../../data/models/machine_model.dart';
-import '../../../../data/models/batch_model.dart';
 import '../../../../data/providers/machine_providers.dart';
 import '../../../../data/providers/batch_providers.dart';
 import '../../models/unified_activity_config.dart';
