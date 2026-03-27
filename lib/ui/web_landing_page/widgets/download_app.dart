@@ -27,7 +27,7 @@ class _DownloadAppState extends State<DownloadApp> {
 
   Future<void> _downloadApk() async {
     final Uri url = Uri.parse(
-      "https://firebasestorage.googleapis.com/v0/b/accel-o-rot.firebasestorage.app/o/accel-o-rot-app.apk?alt=media&token=56490298-4701-45b9-bd35-ba6a39748465",
+      "https://firebasestorage.googleapis.com/v0/b/accel-o-rot.firebasestorage.app/o/apk%2Faccel-o-rot-app.apk?alt=media&token=280e8214-cf56-4bb1-9329-4f81c41f273b",
     );
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
