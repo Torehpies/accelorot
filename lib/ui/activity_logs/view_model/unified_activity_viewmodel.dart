@@ -18,6 +18,8 @@ import '../../../data/providers/cycle_providers.dart';
 import '../../../data/providers/report_providers.dart';
 import '../models/activity_common.dart';
 import '../mappers/activity_presentation_mapper.dart'; 
+import '../../../data/providers/machine_providers.dart';
+import '../../../data/providers/batch_providers.dart';
 
 
 part 'unified_activity_viewmodel.g.dart';
@@ -58,6 +60,11 @@ class UnifiedActivityViewModel extends _$UnifiedActivityViewModel {
   Future<void> _initialize() async {
     final vmStopwatch = Stopwatch()..start();
     debugPrint('ViewModel initialization started');
+
+    // Eagerly pre-load machine and batch providers so table rows
+    // have cached data ready when they render (prevents missing batch names)
+    ref.read(userTeamMachinesProvider);
+    ref.read(userTeamBatchesProvider);
 
     state = state.copyWith(
       status: LoadingStatus.loading,
