@@ -22,7 +22,7 @@ class _WebRestrictOperatorView extends StatelessWidget {
 
   Future<void> downloadApk() async {
     final Uri url = Uri.parse(
-      "https://firebasestorage.googleapis.com/v0/b/accel-o-rot.firebasestorage.app/o/accel-o-rot-app.apk?alt=media&token=56490298-4701-45b9-bd35-ba6a39748465",
+      "https://firebasestorage.googleapis.com/v0/b/accel-o-rot.firebasestorage.app/o/apk%2Faccel-o-rot-app.apk?alt=media&token=280e8214-cf56-4bb1-9329-4f81c41f273b",
     );
 
     await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -132,7 +132,8 @@ class _MobileRestrictOperatorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background1, // Changed to background1 to make the white container pop
+      backgroundColor: AppColors
+          .background1, // Changed to background1 to make the white container pop
       body: Stack(
         children: [
           Positioned.fill(
@@ -148,9 +149,15 @@ class _MobileRestrictOperatorView extends StatelessWidget {
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 20,
+                ),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 32,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
