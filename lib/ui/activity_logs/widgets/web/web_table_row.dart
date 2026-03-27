@@ -38,12 +38,25 @@ class ActivityTableRow extends ConsumerWidget {
           },
         );
 
-    // Get display batch name (prioritize item.batchName, then lookup, NO ID fallback)
+    // Get display batch name:
+    // 1. Use item.batchName if available
+    // 2. Lookup by item.batchId in batches provider
+    // 3. If no batchId, find the machine's active batch as fallback
     final batchName = item.batchName ??
         batchesAsync.whenOrNull(
           data: (batches) {
-            final batch = batches.where((b) => b.id == item.batchId).firstOrNull;
-            return batch?.displayName;
+            if (item.batchId != null) {
+              // Direct lookup by batchId
+              return batches.where((b) => b.id == item.batchId).firstOrNull?.displayName;
+            }
+            // Fallback: find active batch for this machine
+            if (item.machineId != null) {
+              final activeBatch = batches
+                  .where((b) => b.machineId == item.machineId && b.isActive)
+                  .firstOrNull;
+              return activeBatch?.displayName;
+            }
+            return null;
           },
         );
 
