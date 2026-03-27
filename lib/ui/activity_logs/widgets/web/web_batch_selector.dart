@@ -28,10 +28,23 @@ class WebBatchSelector extends ConsumerWidget {
 
     return batchesAsync.when(
       data: (batches) {
-        // Filter batches by selected machine if applicable
-        final filteredBatches = selectedMachineId != null
-            ? batches.where((b) => b.machineId == selectedMachineId).toList()
-            : batches;
+        // If no machine is selected, disable the batch dropdown
+        if (selectedMachineId == null) {
+          return WebDropdown<String>(
+            value: null,
+            label: 'Batch',
+            hintText: 'All Batches',
+            items: const [],
+            onChanged: (_) {},
+            icon: Icons.inventory_2,
+            disabledHint: 'Select a machine first',
+            displayMode: displayMode,
+          );
+        }
+
+        // Filter batches by selected machine
+        final filteredBatches =
+            batches.where((b) => b.machineId == selectedMachineId).toList();
 
         final hasNoBatches = filteredBatches.isEmpty;
 
@@ -46,8 +59,8 @@ class WebBatchSelector extends ConsumerWidget {
           value: selectedBatchId,
           label: 'Batch',
           hintText: 'All Batches',
-          // Show batch ID if selected, otherwise "All Batches"
-          displayText: selectedBatch?.id ?? 'All Batches',
+          // Show batch name if selected, otherwise "All Batches"
+          displayText: selectedBatch?.displayName ?? 'All Batches',
           icon: Icons.inventory_2,
           onChanged: hasNoBatches ? (_) {} : onChanged,
           displayMode: displayMode,
@@ -62,13 +75,11 @@ class WebBatchSelector extends ConsumerWidget {
                   ...filteredBatches.map((batch) {
                     return PopupMenuItem<String>(
                       value: batch.id,
-                      child: Text(batch.id),
+                      child: Text(batch.displayName),
                     );
                   }),
                 ],
-          disabledHint: selectedMachineId != null && hasNoBatches
-              ? 'No batches for machine'
-              : (hasNoBatches ? 'No batches' : null),
+          disabledHint: hasNoBatches ? 'No batches for machine' : null,
         );
       },
       loading: () => WebDropdown<String>(
