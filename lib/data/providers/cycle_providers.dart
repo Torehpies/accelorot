@@ -19,7 +19,7 @@ final cycleRepositoryProvider = Provider<CycleRepository>((ref) {
 
 /// Stream provider for real-time team cycles
 /// Emits updates every 5 seconds with the latest cycles (using centralized cutoff config)
-final teamCyclesStreamProvider = StreamProvider.autoDispose<List<CycleRecommendation>>((ref) {
+final teamCyclesStreamProvider = StreamProvider<List<CycleRecommendation>>((ref) {
   final repository = ref.watch(cycleRepositoryProvider);
   final cutoffDate = DateTime.now().subtract(
     Duration(days: ActivityAggregatorService.defaultCutoffDays),
