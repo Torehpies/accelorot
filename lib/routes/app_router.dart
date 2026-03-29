@@ -34,6 +34,7 @@ import 'package:flutter_application_1/ui/operator_management/view/operator_manag
 import 'package:flutter_application_1/ui/web_landing_page/widgets/download_app.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_application_1/ui/activity_logs/view/activity_logs_route.dart';
+import 'package:flutter_application_1/ui/tasks/view/tasks_route.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_application_1/ui/web_landing_page/view/responsive_landing_page_view.dart';
 import 'package:flutter_application_1/ui/settings/view/settings_screen.dart';
@@ -230,6 +231,17 @@ final routerProvider = Provider<GoRouter>((ref) {
                 name: RoutePath.qrScan.name,
                 pageBuilder: (context, state) => const NoTransitionPage(
                   child: QRScanScreen(),
+                ),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: RoutePath.operatorTasks.path,
+                name: RoutePath.operatorTasks.name,
+                pageBuilder: (context, state) => const NoTransitionPage(
+                  child: TasksRoute(),
                 ),
               ),
             ],

@@ -23,6 +23,7 @@ enum RoutePath {
   profile(path: '/operator/profile'),
   qrScan(path: '/operator/qr-scan'),
   operatorReports(path: '/operator/reports'),
+  operatorTasks(path: '/operator/tasks'),
 
   //admin paths
   adminDashboard(path: '/admin/dashboard'),

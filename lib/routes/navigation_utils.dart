@@ -13,6 +13,7 @@ class NavItem {
 List<NavItem> operatorNavItems = [
   NavItem(Icons.dashboard, "Dashboard", RoutePath.dashboard.path),
   NavItem(Icons.qr_code_scanner, "QR Scan", RoutePath.qrScan.path),
+  NavItem(Icons.task_alt, "Tasks", RoutePath.operatorTasks.path),
   NavItem(Icons.description, "Reports", RoutePath.operatorReports.path),
   NavItem(Icons.settings, "Settings", RoutePath.operatorSettings.path),
 ];

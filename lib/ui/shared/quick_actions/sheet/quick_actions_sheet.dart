@@ -3,16 +3,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/ui/shared/quick_actions/add_waste/add_waste_product.dart';
 import 'package:flutter_application_1/ui/shared/quick_actions/submit_report/submit_report.dart';
+import 'package:flutter_application_1/ui/tasks/bottom_sheets/create_task_bottom_sheet.dart';
 import 'package:flutter_application_1/ui/core/themes/app_theme.dart';
 
 class QuickActionsSheet extends StatelessWidget {
   final String? preSelectedMachineId;
+  final String? preSelectedMachineName;
   final String? preSelectedBatchId;
   final VoidCallback? onAddWaste;
 
   const QuickActionsSheet({
     super.key,
     this.preSelectedMachineId,
+    this.preSelectedMachineName,
     this.preSelectedBatchId,
     this.onAddWaste,
   });
@@ -99,6 +102,30 @@ class QuickActionsSheet extends StatelessWidget {
                 builder: (context) => SubmitReport(
                   preSelectedMachineId: preSelectedMachineId,
                   preSelectedBatchId: preSelectedBatchId,
+                ),
+              );
+            },
+          ),
+
+          const SizedBox(height: 12),
+
+          // Create Task Option
+          _ActionTile(
+            icon: Icons.task_alt,
+            iconColor: Colors.blue,
+            title: 'Create Task',
+            subtitle: 'Add a task to your task list',
+            onTap: () {
+              Navigator.of(context).pop();
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                isDismissible: false,
+                enableDrag: false,
+                builder: (context) => CreateTaskBottomSheet(
+                  preSelectedMachineId: preSelectedMachineId,
+                  preSelectedMachineName: preSelectedMachineName,
                 ),
               );
             },
